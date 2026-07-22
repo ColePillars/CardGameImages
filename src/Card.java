@@ -1,9 +1,8 @@
-
 public class Card {
     String name;
     String slots;
     Integer points;
-    String effect;
+    String text;
 
     public String getName() {
         return name;

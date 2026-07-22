@@ -1,24 +1,27 @@
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
-public class drawCards {
+public class DrawCards {
     public void drawCards() throws IOException {
         String outputDir = outputDir();
         List<Card> cards = parseCardList();
 
-        for (Card card: cards) {
+        for (Card card : cards) {
             drawCard(card, outputDir);
         }
     }
 
     List<Card> parseCardList() throws IOException {
-        BufferedReader bufferedReader =
-                new BufferedReader(new FileReader("./input/cardList.csv"));
+        BufferedReader bufferedReader = new BufferedReader(new FileReader("./input/cardList.csv"));
         List<Card> cards = new ArrayList<>();
         String line;
         int name = 1;
@@ -31,20 +34,16 @@ public class drawCards {
         return cards;
     }
 
-    void drawCard (Card card, String outputDir) throws IOException {
+    void drawCard(Card card, String outputDir) throws IOException {
         BufferedImage image = new BufferedImage(744, 1039, BufferedImage.TYPE_INT_ARGB);
         Graphics g = image.createGraphics();
 
         g.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
         drawSlots(g, card.getSlots());
-        g.drawImage(
-                ImageIO.read(new File("./input/backpack.png")),
-                10,
-                120,
-                null);
+        g.drawImage(ImageIO.read(new File("./input/backpack.png")), 10, 120, null);
         g.dispose();
 
-        ImageIO.write(image,"PNG", new File(outputDir, card.getName() + ".png"));
+        ImageIO.write(image, "PNG", new File(outputDir, card.getName() + ".png"));
     }
 
     void drawSlots(Graphics g, String slots) throws IOException {
@@ -58,20 +57,14 @@ public class drawCards {
         int horizontalOffset = 20;
 
         for (char slot : slotsArray) {
-            g.drawImage(
-                    ImageIO.read(new File("./input/" + slot + "B.png")),
-                    verticalOffset,
-                    horizontalOffset,
-                    null);
+            g.drawImage(ImageIO.read(new File("./input/" + slot + "B.png")), verticalOffset, horizontalOffset, null);
 
             verticalOffset += 100;
         }
     }
 
     String outputDir() {
-        String outputDir =
-                "./output/" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss")
-                .format(new Date());
+        String outputDir = "./output/" + new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss").format(new Date());
 
         if (new File(outputDir).mkdirs()) {
             return outputDir;

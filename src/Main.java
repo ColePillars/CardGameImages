@@ -1,4 +1,7 @@
+import java.io.IOException;
 
-void main() throws IOException {
-    new drawCards().drawCards();
+public class Main {
+    public static void main() throws IOException {
+        new DrawCards().drawCards();
+    }
 }
