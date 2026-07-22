@@ -1,7 +1,9 @@
+import com.opencsv.CSVReader;
+import com.opencsv.exceptions.CsvValidationException;
+
 import javax.imageio.ImageIO;
-import java.awt.*;
+import java.awt.Graphics;
 import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -13,22 +15,25 @@ import java.util.List;
 public class DrawCards {
     public void drawCards() throws IOException {
         String outputDir = outputDir();
-        List<Card> cards = parseCardList();
+        List<Card> cards = parseCardCSV();
 
         for (Card card : cards) {
             drawCard(card, outputDir);
         }
     }
 
-    List<Card> parseCardList() throws IOException {
-        BufferedReader bufferedReader = new BufferedReader(new FileReader("./input/cardList.csv"));
+    List<Card> parseCardCSV() {
         List<Card> cards = new ArrayList<>();
-        String line;
-        int name = 1;
 
-        while ((line = bufferedReader.readLine()) != null) {
-            cards.add(new Card(Integer.toString(name), line));
-            name++;
+        try (CSVReader reader = new CSVReader(new FileReader("./input/cardList2.csv"))) {
+            int name = 1;
+            String[] line;
+            while ((line = reader.readNext()) != null) {
+                cards.add(new Card(Card.CardType.CHARM, Integer.toString(name), line[0], line[1], line[2]));
+                name++;
+            }
+        } catch (IOException | CsvValidationException e) {
+            System.err.println(e.getMessage());
         }
 
         return cards;
@@ -39,27 +44,32 @@ public class DrawCards {
         Graphics g = image.createGraphics();
 
         g.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
-        drawSlots(g, card.getSlots());
+        drawSlots(g, card);
         g.drawImage(ImageIO.read(new File("./input/backpack.png")), 10, 120, null);
         g.dispose();
 
         ImageIO.write(image, "PNG", new File(outputDir, card.getName() + ".png"));
     }
 
-    void drawSlots(Graphics g, String slots) throws IOException {
-        if (slots == null || slots.length() > 6 || slots.isEmpty()) {
-            throw new RuntimeException("incompatible slots in: " + slots);
+    void drawSlots(Graphics g, Card card) throws IOException {
+        if (card.getSlots() == null || card.getSlots().length() > 6 || card.getSlots().isEmpty()) {
+            throw new RuntimeException("incompatible slots in: " + card.getSlots());
         }
 
-        char[] slotsArray = slots.toCharArray();
+        if (card.getType().equals(Card.CardType.BAG)) {
+            char[] slotsArray = card.getSlots().toCharArray();
 
-        int verticalOffset = 327 - 50 * slotsArray.length;
-        int horizontalOffset = 20;
+            int horizontalOffset = 327 - 50 * slotsArray.length;
+            int verticalOffset = 20;
 
-        for (char slot : slotsArray) {
-            g.drawImage(ImageIO.read(new File("./input/" + slot + "B.png")), verticalOffset, horizontalOffset, null);
+            for (char slot : slotsArray) {
+                g.drawImage(ImageIO.read(new File("./input/" + slot + "B.png")), horizontalOffset, verticalOffset, null);
 
-            verticalOffset += 100;
+                horizontalOffset += 100;
+            }
+        } else if (card.getType().equals(Card.CardType.CHARM)) {
+            g.drawImage(ImageIO.read(new File("./input/" + card.getSlots().replaceAll("[/]+", "") + "B.png")), 277, 20, null);
+
         }
     }
 

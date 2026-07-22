@@ -1,8 +1,25 @@
 public class Card {
+    CardType type;
     String name;
+    String points;
     String slots;
-    Integer points;
     String text;
+
+    public Card(CardType type, String name, String points, String slots, String text) {
+        this.type = type;
+        this.name = name;
+        this.points = points;
+        this.slots = slots;
+        this.text = text;
+    }
+
+    public CardType getType() {
+        return type;
+    }
+
+    public void setType(CardType type) {
+        this.type = type;
+    }
 
     public String getName() {
         return name;
@@ -20,9 +37,21 @@ public class Card {
         this.slots = slots;
     }
 
-    public Card(String name, String slots) {
-        this.name = name;
-        this.slots = slots;
+    public String getPoints() {
+        return points;
     }
 
+    public void setPoints(String points) {
+        this.points = points;
+    }
+
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    enum CardType {BAG, CHARM}
 }
