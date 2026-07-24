@@ -11,6 +11,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 public class DrawCards {
     public void drawCards() throws IOException {
@@ -25,11 +26,12 @@ public class DrawCards {
     List<Card> parseCardCSV() {
         List<Card> cards = new ArrayList<>();
 
-        try (CSVReader reader = new CSVReader(new FileReader("./input/cardList2.csv"))) {
+        try (CSVReader reader = new CSVReader(new FileReader("./input/cardList.csv"))) {
             int name = 1;
             String[] line;
             while ((line = reader.readNext()) != null) {
-                cards.add(new Card(Card.CardType.CHARM, Integer.toString(name), line[0], line[1], line[2]));
+                Card.CardType cardType = Objects.equals(line[0], "C") ? Card.CardType.CHARM : Card.CardType.BAG;
+                cards.add(new Card(cardType, Integer.toString(name), line[1], line[2], line[3]));
                 name++;
             }
         } catch (IOException | CsvValidationException e) {
@@ -68,7 +70,7 @@ public class DrawCards {
                 horizontalOffset += 100;
             }
         } else if (card.getType().equals(Card.CardType.CHARM)) {
-            g.drawImage(ImageIO.read(new File("./input/" + card.getSlots().replaceAll("[/]+", "") + "B.png")), 277, 20, null);
+            g.drawImage(ImageIO.read(new File("./input/" + card.getSlots().replaceAll("[/]+", "") + "C.png")), 277, 20, null);
 
         }
     }
