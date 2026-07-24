@@ -61,16 +61,16 @@ public class DrawCards {
         if (card.getType().equals(Card.CardType.BAG)) {
             char[] slotsArray = card.getSlots().toCharArray();
 
-            int horizontalOffset = 327 - 50 * slotsArray.length;
+            int horizontalOffset = 373 - 41 * slotsArray.length;
             int verticalOffset = 20;
 
             for (char slot : slotsArray) {
                 g.drawImage(ImageIO.read(new File("./input/" + slot + "B.png")), horizontalOffset, verticalOffset, null);
 
-                horizontalOffset += 100;
+                horizontalOffset += 82;
             }
         } else if (card.getType().equals(Card.CardType.CHARM)) {
-            g.drawImage(ImageIO.read(new File("./input/" + card.getSlots().replaceAll("[/]+", "") + "C.png")), 277, 20, null);
+            g.drawImage(ImageIO.read(new File("./input/" + card.getSlots().replaceAll("[/]+", "") + "C.png")), 332, 20, null);
 
         }
     }
