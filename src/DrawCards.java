@@ -1,7 +1,10 @@
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
+import org.apache.commons.text.WordUtils;
 
 import javax.imageio.ImageIO;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -46,11 +49,25 @@ public class DrawCards {
         Graphics g = image.createGraphics();
 
         g.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
+        drawText(g, card.getTypeString(), 10, 10, 100, 100, 100);
+        drawText(g, card.getPoints(), 634, 10, 100, 100, 100);
+        //drawText(g, card.getText(), 10, 673, 724, 356, 60);
         drawSlots(g, card);
         g.drawImage(ImageIO.read(new File("./input/backpack.png")), 10, 120, null);
         g.dispose();
 
         ImageIO.write(image, "PNG", new File(outputDir, card.getName() + ".png"));
+    }
+
+    void drawText(Graphics g, String text, int x, int y, int width, int height, int fontsize) {
+        Font font = new Font(null, Font.PLAIN, fontsize);
+        FontMetrics metrics = g.getFontMetrics(font);
+
+        g.setFont(font);
+        g.drawString(
+                WordUtils.wrap(text, 10),
+                x + (width - metrics.stringWidth(text)) / 2,
+                y + ((height - metrics.getHeight()) / 2) + metrics.getAscent());
     }
 
     void drawSlots(Graphics g, Card card) throws IOException {
@@ -65,13 +82,20 @@ public class DrawCards {
             int verticalOffset = 20;
 
             for (char slot : slotsArray) {
-                g.drawImage(ImageIO.read(new File("./input/" + slot + "B.png")), horizontalOffset, verticalOffset, null);
+                g.drawImage(
+                        ImageIO.read(new File("./input/" + slot + "B.png")),
+                        horizontalOffset,
+                        verticalOffset,
+                        null);
 
                 horizontalOffset += 82;
             }
         } else if (card.getType().equals(Card.CardType.CHARM)) {
-            g.drawImage(ImageIO.read(new File("./input/" + card.getSlots().replaceAll("[/]+", "") + "C.png")), 332, 20, null);
-
+            g.drawImage(
+                    ImageIO.read(new File("./input/" + card.getSlots().replaceAll("/+", "") + "C.png")),
+                    332,
+                    20,
+                    null);
         }
     }
 

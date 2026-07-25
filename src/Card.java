@@ -53,5 +53,9 @@ public class Card {
         this.text = text;
     }
 
+    public String getTypeString() {
+        return type.equals(CardType.BAG) ? "B" : "C";
+    }
+
     enum CardType {BAG, CHARM}
 }
