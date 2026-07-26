@@ -6,6 +6,7 @@ import javax.imageio.ImageIO;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
@@ -49,9 +50,9 @@ public class DrawCards {
         Graphics g = image.createGraphics();
 
         g.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
-        drawText(g, card.getTypeString(), 10, 10, 100, 100, 100);
-        drawText(g, card.getPoints(), 634, 10, 100, 100, 100);
-        //drawText(g, card.getText(), 10, 673, 724, 356, 60);
+        drawText(g, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
+        drawText(g, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
+        drawText(g, card.getText(), new Rectangle(10, 673, 724, 356), 55);
         drawSlots(g, card);
         g.drawImage(ImageIO.read(new File("./input/backpack.png")), 10, 120, null);
         g.dispose();
@@ -59,15 +60,21 @@ public class DrawCards {
         ImageIO.write(image, "PNG", new File(outputDir, card.getName() + ".png"));
     }
 
-    void drawText(Graphics g, String text, int x, int y, int width, int height, int fontsize) {
+    void drawText(Graphics g, String text, Rectangle rectangle, int fontsize) {
         Font font = new Font(null, Font.PLAIN, fontsize);
         FontMetrics metrics = g.getFontMetrics(font);
-
         g.setFont(font);
-        g.drawString(
-                WordUtils.wrap(text, 10),
-                x + (width - metrics.stringWidth(text)) / 2,
-                y + ((height - metrics.getHeight()) / 2) + metrics.getAscent());
+
+        String[] lines = WordUtils.wrap(text, 25, "\n", true).split("\n");
+        int multiLineOffset = (lines.length - 1) * metrics.getHeight() * -1 / 2;
+
+        for (String line : lines) {
+            g.drawString(
+                    line,
+                    rectangle.x + (rectangle.width - metrics.stringWidth(line)) / 2,
+                    rectangle.y + ((rectangle.height - metrics.getHeight()) / 2) + metrics.getAscent() + multiLineOffset);
+            multiLineOffset += metrics.getHeight();
+        }
     }
 
     void drawSlots(Graphics g, Card card) throws IOException {
