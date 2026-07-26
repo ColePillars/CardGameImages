@@ -99,7 +99,7 @@ public class DrawCards {
             }
         } else if (card.getType().equals(Card.CardType.CHARM)) {
             g.drawImage(
-                    ImageIO.read(new File("./input/" + card.getSlots().replaceAll("/+", "") + "C.png")),
+                    ImageIO.read(new File("./input/" + card.getSlots() + "C.png")),
                     332,
                     20,
                     null);
