@@ -54,7 +54,7 @@ public class DrawCards {
         drawText(g, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
         drawText(g, card.getText(), new Rectangle(10, 673, 724, 356), 55);
         drawSlots(g, card);
-        g.drawImage(ImageIO.read(new File("./input/backpack.png")), 10, 120, null);
+        drawPicture(g, card);
         g.dispose();
 
         ImageIO.write(image, "PNG", new File(outputDir, card.getName() + ".png"));
@@ -103,6 +103,15 @@ public class DrawCards {
                     332,
                     20,
                     null);
+        }
+    }
+
+    void drawPicture(Graphics g, Card card) throws IOException {
+        //TODO draw different pictures for each card
+        if (card.getType().equals(Card.CardType.BAG)) {
+            g.drawImage(ImageIO.read(new File("./input/bag.png")), 10, 120, null);
+        } else if (card.getType().equals(Card.CardType.CHARM)) {
+            g.drawImage(ImageIO.read(new File("./input/charm.png")), 10, 120, null);
         }
     }
 
