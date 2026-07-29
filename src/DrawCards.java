@@ -3,6 +3,7 @@ import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.text.WordUtils;
 
 import javax.imageio.ImageIO;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
@@ -18,13 +19,25 @@ import java.util.List;
 import java.util.Objects;
 
 public class DrawCards {
-    public void drawCards() throws IOException {
+    public void drawCardsAndSheets() throws IOException {
         String outputDir = outputDir();
         List<Card> cards = parseCardCSV();
 
-        for (Card card : cards) {
-            drawCard(card, outputDir);
+        BufferedImage sheetImage = new BufferedImage(3600, 3600, BufferedImage.TYPE_INT_ARGB);
+        Graphics sheetGraphics = sheetImage.createGraphics();
+        sheetGraphics.setColor(Color.WHITE);
+        sheetGraphics.fillRect(0, 0, 3600, 3600);
+
+        for (int i = 1; i <= cards.size(); i++) {
+            drawCard(cards.get(i - 1), outputDir, sheetGraphics);
+            if (i % 12 == 0) {
+                ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + i / 12 + ".png"));
+                sheetGraphics.fillRect(0, 0, 3600, 3600);
+            } else if (i == cards.size()) {
+                ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + ((i / 12) + 1) + ".png"));
+            }
         }
+        sheetGraphics.dispose();
     }
 
     List<Card> parseCardCSV() {
@@ -45,19 +58,24 @@ public class DrawCards {
         return cards;
     }
 
-    void drawCard(Card card, String outputDir) throws IOException {
-        BufferedImage image = new BufferedImage(744, 1039, BufferedImage.TYPE_INT_ARGB);
-        Graphics g = image.createGraphics();
+    void drawCard(Card card, String outputDir, Graphics sheetGraphics) throws IOException {
+        BufferedImage cardImage = new BufferedImage(744, 1039, BufferedImage.TYPE_INT_ARGB);
+        Graphics cardGraphics = cardImage.createGraphics();
 
-        g.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
-        drawText(g, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
-        drawText(g, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
-        drawText(g, card.getText(), new Rectangle(10, 673, 724, 356), 55);
-        drawSlots(g, card);
-        drawPicture(g, card);
-        g.dispose();
+        cardGraphics.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
+        drawText(cardGraphics, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
+        drawText(cardGraphics, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
+        drawText(cardGraphics, card.getText(), new Rectangle(10, 673, 724, 356), 55);
+        drawSlots(cardGraphics, card);
+        drawPicture(cardGraphics, card);
 
-        ImageIO.write(image, "PNG", new File(outputDir, card.getName() + ".png"));
+        ImageIO.write(cardImage, "PNG", new File(outputDir, card.getName() + ".png"));
+        cardGraphics.dispose();
+
+        int sheetX = ((Integer.parseInt(card.getName()) - 1) % 4) * 745;
+        int sheetY = (((Integer.parseInt(card.getName()) - 1) / 4) % 3) * 1040;
+        sheetGraphics.drawImage(cardImage, sheetX, sheetY, null);
+        sheetGraphics.drawImage(ImageIO.read(new File("./input/overlay.png")), sheetX, sheetY, null);
     }
 
     void drawText(Graphics g, String text, Rectangle rectangle, int fontsize) {
