@@ -8,6 +8,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
@@ -127,10 +129,39 @@ public class DrawCards {
     void drawPicture(Graphics g, Card card) throws IOException {
         //TODO draw different pictures for each card
         if (card.getType().equals(Card.CardType.BAG)) {
-            g.drawImage(ImageIO.read(new File("./input/bag.png")), 10, 120, null);
+            g.drawImage(
+                    pixelateImage(
+                            ImageIO.read(new File("./input/bag.png")),
+                            200,
+                            150),
+                    10,
+                    120,
+                    null);
         } else if (card.getType().equals(Card.CardType.CHARM)) {
-            g.drawImage(ImageIO.read(new File("./input/charm.png")), 10, 120, null);
+            g.drawImage(
+                    pixelateImage(
+                            ImageIO.read(new File("./input/charm.png")),
+                            200,
+                            150),
+                    10,
+                    120,
+                    null);
         }
+    }
+
+    BufferedImage pixelateImage(BufferedImage image, int width, int height) {
+        return resizeImage(
+                resizeImage(image, width, height),
+                image.getWidth(),
+                image.getHeight());
+    }
+
+    BufferedImage resizeImage(BufferedImage image, int width, int height) {
+        AffineTransform scalingTransform = new AffineTransform();
+        scalingTransform.scale((double) width / image.getWidth(), (double) height / image.getHeight());
+        AffineTransformOp scaleOp = new AffineTransformOp(scalingTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
+
+        return scaleOp.filter(image, new BufferedImage(width, height, image.getType()));
     }
 
     String outputDir() {
