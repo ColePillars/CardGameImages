@@ -14,14 +14,18 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class DrawCards {
     public void drawCardsAndSheets() throws IOException {
+        System.out.println(new Date());
         String outputDir = outputDir();
         List<Card> cards = parseCardCSV();
 
@@ -40,24 +44,7 @@ public class DrawCards {
             }
         }
         sheetGraphics.dispose();
-    }
-
-    List<Card> parseCardCSV() {
-        List<Card> cards = new ArrayList<>();
-
-        try (CSVReader reader = new CSVReader(new FileReader("./input/cardList.csv"))) {
-            int name = 1;
-            String[] line;
-            while ((line = reader.readNext()) != null) {
-                Card.CardType cardType = Objects.equals(line[0], "C") ? Card.CardType.CHARM : Card.CardType.BAG;
-                cards.add(new Card(cardType, Integer.toString(name), line[1], line[2], line[3]));
-                name++;
-            }
-        } catch (IOException | CsvValidationException e) {
-            System.err.println(e.getMessage());
-        }
-
-        return cards;
+        System.out.println(new Date());
     }
 
     void drawCard(Card card, String outputDir, Graphics sheetGraphics) throws IOException {
@@ -103,12 +90,12 @@ public class DrawCards {
         }
 
         if (card.getType().equals(Card.CardType.BAG)) {
-            char[] slotsArray = card.getSlots().toCharArray();
+            List<Character> slotsList = orderColors(card.getSlots());
 
-            int horizontalOffset = 373 - 41 * slotsArray.length;
+            int horizontalOffset = 373 - 41 * slotsList.size();
             int verticalOffset = 20;
 
-            for (char slot : slotsArray) {
+            for (char slot : slotsList) {
                 g.drawImage(
                         ImageIO.read(new File("./input/" + slot + "B.png")),
                         horizontalOffset,
@@ -149,6 +136,59 @@ public class DrawCards {
         }
     }
 
+    List<Character> orderColors(String slots) throws IOException {
+        List<Character> reorderedSlots = new ArrayList<>();
+        StringBuilder stringBuilder = new StringBuilder();
+
+        for (char ch : slots.toCharArray()) {
+            if (ch == 'W') {
+                reorderedSlots.add(ch);
+            } else if ("PUGYOR".indexOf(ch) >= 0) {
+                stringBuilder.append(ch);
+            }
+        }
+
+        String coloredSlots = stringBuilder.toString();
+
+        String colorOrder =
+                Files.readAllLines(
+                                new File(
+                                        "input/colorOrders.txt").toPath(),
+                                Charset.defaultCharset())
+                        .stream()
+                        .filter(string -> similarStrings(coloredSlots, string))
+                        .findFirst()
+                        .orElse("");
+
+        List<Character> charList =
+                coloredSlots.chars()
+                        .mapToObj(e -> (char) e)
+                        .sorted(
+                                (obj1, obj2) -> {
+                                    int index1 = colorOrder.indexOf(obj1);
+                                    int index2 = colorOrder.indexOf(obj2);
+                                    return Integer.compare(index1, index2);
+                                })
+                        .collect(Collectors.toList());
+
+        reorderedSlots.addAll(charList);
+        return reorderedSlots;
+    }
+
+    boolean similarStrings(String s1, String s2) {
+        for (char ch : s1.toCharArray()) {
+            if (s2.indexOf(ch) < 0) {
+                return false;
+            }
+        }
+        for (char ch : s2.toCharArray()) {
+            if (s1.indexOf(ch) < 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     BufferedImage pixelateImage(BufferedImage image, int width, int height) {
         return resizeImage(
                 resizeImage(image, width, height),
@@ -174,4 +214,21 @@ public class DrawCards {
         }
     }
 
+    List<Card> parseCardCSV() {
+        List<Card> cards = new ArrayList<>();
+
+        try (CSVReader reader = new CSVReader(new FileReader("./input/cardList.csv"))) {
+            int name = 1;
+            String[] line;
+            while ((line = reader.readNext()) != null) {
+                Card.CardType cardType = Objects.equals(line[0], "C") ? Card.CardType.CHARM : Card.CardType.BAG;
+                cards.add(new Card(cardType, Integer.toString(name), line[1], line[2], line[3]));
+                name++;
+            }
+        } catch (IOException | CsvValidationException e) {
+            System.err.println(e.getMessage());
+        }
+
+        return cards;
+    }
 }
