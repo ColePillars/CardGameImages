@@ -1,13 +1,13 @@
 public class Card {
     CardType type;
-    String name;
+    Integer number;
     String points;
     String slots;
     String text;
 
-    public Card(CardType type, String name, String points, String slots, String text) {
+    public Card(CardType type, Integer number, String points, String slots, String text) {
         this.type = type;
-        this.name = name;
+        this.number = number;
         this.points = points;
         this.slots = slots;
         this.text = text;
@@ -21,12 +21,12 @@ public class Card {
         this.type = type;
     }
 
-    public String getName() {
-        return name;
+    public Integer getNumber() {
+        return number;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNumber(Integer number) {
+        this.number = number;
     }
 
     public String getSlots() {

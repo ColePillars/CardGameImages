@@ -24,23 +24,31 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DrawCards {
+    static int cardWidth = 744;
+    static int cardHeight = 1039;
+    static int sheetWidth = 2550;
+    static int sheetHeight = 3300;
+    static int numberOfCardsWide = 3;
+    static int numberOfCardsHigh = 3;
+    static int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
+
     public void drawCardsAndSheets() throws IOException {
         System.out.println(new Date());
         String outputDir = outputDir();
         List<Card> cards = parseCardCSV();
 
-        BufferedImage sheetImage = new BufferedImage(3600, 3600, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage sheetImage = new BufferedImage(sheetWidth, sheetHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics sheetGraphics = sheetImage.createGraphics();
         sheetGraphics.setColor(Color.WHITE);
-        sheetGraphics.fillRect(0, 0, 3600, 3600);
+        sheetGraphics.fillRect(0, 0, sheetWidth, sheetHeight);
 
         for (int i = 1; i <= cards.size(); i++) {
             drawCard(cards.get(i - 1), outputDir, sheetGraphics);
-            if (i % 12 == 0) {
-                ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + i / 12 + ".png"));
-                sheetGraphics.fillRect(0, 0, 3600, 3600);
+            if (i % numberOfCardsSheet == 0) {
+                ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + i / numberOfCardsSheet + ".png"));
+                sheetGraphics.fillRect(0, 0, sheetWidth, sheetHeight);
             } else if (i == cards.size()) {
-                ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + ((i / 12) + 1) + ".png"));
+                ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + ((i / numberOfCardsSheet) + 1) + ".png"));
             }
         }
         sheetGraphics.dispose();
@@ -48,7 +56,7 @@ public class DrawCards {
     }
 
     void drawCard(Card card, String outputDir, Graphics sheetGraphics) throws IOException {
-        BufferedImage cardImage = new BufferedImage(744, 1039, BufferedImage.TYPE_INT_ARGB);
+        BufferedImage cardImage = new BufferedImage(cardWidth, cardHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics cardGraphics = cardImage.createGraphics();
 
         cardGraphics.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
@@ -58,11 +66,11 @@ public class DrawCards {
         drawSlots(cardGraphics, card);
         drawPicture(cardGraphics, card);
 
-        ImageIO.write(cardImage, "PNG", new File(outputDir, card.getName() + ".png"));
+        ImageIO.write(cardImage, "PNG", new File(outputDir, card.getNumber() + ".png"));
         cardGraphics.dispose();
 
-        int sheetX = ((Integer.parseInt(card.getName()) - 1) % 4) * 745;
-        int sheetY = (((Integer.parseInt(card.getName()) - 1) / 4) % 3) * 1040;
+        int sheetX = ((card.getNumber() - 1) % numberOfCardsWide) * (cardWidth + 1);
+        int sheetY = (((card.getNumber() - 1) / numberOfCardsWide) % numberOfCardsHigh) * (cardHeight + 1);
         sheetGraphics.drawImage(cardImage, sheetX, sheetY, null);
         sheetGraphics.drawImage(ImageIO.read(new File("./input/overlay.png")), sheetX, sheetY, null);
     }
@@ -218,12 +226,12 @@ public class DrawCards {
         List<Card> cards = new ArrayList<>();
 
         try (CSVReader reader = new CSVReader(new FileReader("./input/cardList.csv"))) {
-            int name = 1;
+            int number = 1;
             String[] line;
             while ((line = reader.readNext()) != null) {
                 Card.CardType cardType = Objects.equals(line[0], "C") ? Card.CardType.CHARM : Card.CardType.BAG;
-                cards.add(new Card(cardType, Integer.toString(name), line[1], line[2], line[3]));
-                name++;
+                cards.add(new Card(cardType, number, line[1], line[2], line[3]));
+                number++;
             }
         } catch (IOException | CsvValidationException e) {
             System.err.println(e.getMessage());
