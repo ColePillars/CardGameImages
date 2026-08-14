@@ -31,6 +31,8 @@ public class DrawCards {
     static int numberOfCardsWide = 3;
     static int numberOfCardsHigh = 3;
     static int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
+    static int imageWidth = 724;
+    static int imageHeight = 543;
 
     public void drawCardsAndSheets() throws IOException {
         System.out.println(new Date());
@@ -123,25 +125,11 @@ public class DrawCards {
 
     void drawPicture(Graphics g, Card card) throws IOException {
         //TODO draw different pictures for each card
-        if (card.getType().equals(Card.CardType.BAG)) {
-            g.drawImage(
-                    pixelateImage(
-                            ImageIO.read(new File("./input/bag.png")),
-                            200,
-                            150),
-                    10,
-                    120,
-                    null);
-        } else if (card.getType().equals(Card.CardType.CHARM)) {
-            g.drawImage(
-                    pixelateImage(
-                            ImageIO.read(new File("./input/charm.png")),
-                            200,
-                            150),
-                    10,
-                    120,
-                    null);
-        }
+        BufferedImage image = card.getType().equals(Card.CardType.BAG) ?
+                ImageIO.read(new File("./input/bag.png")) :
+                ImageIO.read(new File("./input/charm.png"));
+
+        g.drawImage(pixelateImage(image), 10, 120, null);
     }
 
     List<Character> orderColors(String slots) throws IOException {
@@ -197,14 +185,18 @@ public class DrawCards {
         return true;
     }
 
-    BufferedImage pixelateImage(BufferedImage image, int width, int height) {
+    BufferedImage pixelateImage(BufferedImage image) {
         return resizeImage(
-                resizeImage(image, width, height),
-                image.getWidth(),
-                image.getHeight());
+                resizeImage(image, 200, 150),
+                imageWidth,
+                imageHeight);
     }
 
     BufferedImage resizeImage(BufferedImage image, int width, int height) {
+        if (image.getWidth() == width && image.getHeight() == height) {
+            return image;
+        }
+
         AffineTransform scalingTransform = new AffineTransform();
         scalingTransform.scale((double) width / image.getWidth(), (double) height / image.getHeight());
         AffineTransformOp scaleOp = new AffineTransformOp(scalingTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
@@ -229,7 +221,7 @@ public class DrawCards {
             int number = 1;
             String[] line;
             while ((line = reader.readNext()) != null) {
-                Card.CardType cardType = Objects.equals(line[0], "C") ? Card.CardType.CHARM : Card.CardType.BAG;
+                Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
                 cards.add(new Card(cardType, number, line[1], line[2], line[3]));
                 number++;
             }
