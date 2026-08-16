@@ -31,8 +31,8 @@ public class DrawCards {
     static int numberOfCardsWide = 3;
     static int numberOfCardsHigh = 3;
     static int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
-    static int imageWidth = 724;
-    static int imageHeight = 543;
+    static int artWidth = 724;
+    static int artHeight = 543;
 
     public void drawCardsAndSheets() throws IOException {
         System.out.println(new Date());
@@ -66,7 +66,7 @@ public class DrawCards {
         drawText(cardGraphics, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
         drawText(cardGraphics, card.getText(), new Rectangle(10, 673, 724, 356), 55);
         drawSlots(cardGraphics, card);
-        drawPicture(cardGraphics, card);
+        drawArt(cardGraphics, card);
 
         ImageIO.write(cardImage, "PNG", new File(outputDir, card.getNumber() + ".png"));
         cardGraphics.dispose();
@@ -107,7 +107,7 @@ public class DrawCards {
 
             for (char slot : slotsList) {
                 g.drawImage(
-                        ImageIO.read(new File("./input/" + slot + "B.png")),
+                        ImageIO.read(new File("./input/symbol/" + slot + "B.png")),
                         horizontalOffset,
                         verticalOffset,
                         null);
@@ -116,20 +116,25 @@ public class DrawCards {
             }
         } else if (card.getType().equals(Card.CardType.CHARM)) {
             g.drawImage(
-                    ImageIO.read(new File("./input/" + card.getSlots() + "C.png")),
+                    ImageIO.read(new File("./input/symbol/" + card.getSlots() + "C.png")),
                     332,
                     20,
                     null);
         }
     }
 
-    void drawPicture(Graphics g, Card card) throws IOException {
-        //TODO draw different pictures for each card
-        BufferedImage image = card.getType().equals(Card.CardType.BAG) ?
-                ImageIO.read(new File("./input/bag.png")) :
-                ImageIO.read(new File("./input/charm.png"));
+    void drawArt(Graphics g, Card card) throws IOException {
+        BufferedImage art;
 
-        g.drawImage(pixelateImage(image), 10, 120, null);
+        if (!card.getArtName().isEmpty()) {
+            art = ImageIO.read(new File("./input/art/" + card.getArtName() + ".png"));
+        } else if (card.getType().equals(Card.CardType.BAG)) {
+            art = ImageIO.read(new File("./input/bag.png"));
+        } else {
+            art = ImageIO.read(new File("./input/charm.png"));
+        }
+
+        g.drawImage(pixelateImage(art), 10, 120, null);
     }
 
     List<Character> orderColors(String slots) throws IOException {
@@ -187,9 +192,9 @@ public class DrawCards {
 
     BufferedImage pixelateImage(BufferedImage image) {
         return resizeImage(
-                resizeImage(image, 200, 150),
-                imageWidth,
-                imageHeight);
+                resizeImage(image, 400, 300),
+                artWidth,
+                artHeight);
     }
 
     BufferedImage resizeImage(BufferedImage image, int width, int height) {
@@ -222,7 +227,7 @@ public class DrawCards {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
-                cards.add(new Card(cardType, number, line[1], line[2], line[3]));
+                cards.add(new Card(cardType, number, line[1], line[2], line[3], line[4]));
                 number++;
             }
         } catch (IOException | CsvValidationException e) {

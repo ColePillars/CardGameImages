@@ -3,13 +3,15 @@ public class Card {
     Integer number;
     String points;
     String slots;
+    String artName;
     String text;
 
-    public Card(CardType type, Integer number, String points, String slots, String text) {
+    public Card(CardType type, Integer number, String points, String slots, String artName, String text) {
         this.type = type;
         this.number = number;
         this.points = points;
         this.slots = slots;
+        this.artName = artName;
         this.text = text;
     }
 
@@ -29,6 +31,14 @@ public class Card {
         this.number = number;
     }
 
+    public String getPoints() {
+        return points;
+    }
+
+    public void setPoints(String points) {
+        this.points = points;
+    }
+
     public String getSlots() {
         return slots;
     }
@@ -37,12 +47,12 @@ public class Card {
         this.slots = slots;
     }
 
-    public String getPoints() {
-        return points;
+    public String getArtName() {
+        return artName;
     }
 
-    public void setPoints(String points) {
-        this.points = points;
+    public void setArtName(String artName) {
+        this.artName = artName;
     }
 
     public String getText() {
