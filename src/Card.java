@@ -1,14 +1,12 @@
 public class Card {
     CardType type;
-    Integer number;
     String points;
     String slots;
     String artName;
     String text;
 
-    public Card(CardType type, Integer number, String points, String slots, String artName, String text) {
+    public Card(CardType type, String points, String slots, String artName, String text) {
         this.type = type;
-        this.number = number;
         this.points = points;
         this.slots = slots;
         this.artName = artName;
@@ -21,14 +19,6 @@ public class Card {
 
     public void setType(CardType type) {
         this.type = type;
-    }
-
-    public Integer getNumber() {
-        return number;
-    }
-
-    public void setNumber(Integer number) {
-        this.number = number;
     }
 
     public String getPoints() {

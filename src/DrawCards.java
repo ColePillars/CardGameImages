@@ -44,8 +44,17 @@ public class DrawCards {
         sheetGraphics.setColor(Color.WHITE);
         sheetGraphics.fillRect(0, 0, sheetWidth, sheetHeight);
 
+        BufferedImage cardImage = new BufferedImage(cardWidth, cardHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics cardGraphics = cardImage.createGraphics();
+
         for (int i = 1; i <= cards.size(); i++) {
-            drawCard(cards.get(i - 1), outputDir, sheetGraphics);
+            drawCard(cards.get(i - 1), cardGraphics);
+            ImageIO.write(cardImage, "PNG", new File(outputDir, i + ".png"));
+            int sheetX = ((i - 1) % numberOfCardsWide) * (cardWidth + 1);
+            int sheetY = (((i - 1) / numberOfCardsWide) % numberOfCardsHigh) * (cardHeight + 1);
+            sheetGraphics.drawImage(cardImage, sheetX, sheetY, null);
+            sheetGraphics.drawImage(ImageIO.read(new File("./input/overlay.png")), sheetX, sheetY, null);
+
             if (i % numberOfCardsSheet == 0) {
                 ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + i / numberOfCardsSheet + ".png"));
                 sheetGraphics.fillRect(0, 0, sheetWidth, sheetHeight);
@@ -54,27 +63,17 @@ public class DrawCards {
             }
         }
         sheetGraphics.dispose();
+        cardGraphics.dispose();
         System.out.println(new Date());
     }
 
-    void drawCard(Card card, String outputDir, Graphics sheetGraphics) throws IOException {
-        BufferedImage cardImage = new BufferedImage(cardWidth, cardHeight, BufferedImage.TYPE_INT_ARGB);
-        Graphics cardGraphics = cardImage.createGraphics();
-
+    void drawCard(Card card, Graphics cardGraphics) throws IOException {
         cardGraphics.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
         drawText(cardGraphics, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
         drawText(cardGraphics, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
         drawText(cardGraphics, card.getText(), new Rectangle(10, 673, 724, 356), 55);
         drawSlots(cardGraphics, card);
         drawArt(cardGraphics, card);
-
-        ImageIO.write(cardImage, "PNG", new File(outputDir, card.getNumber() + ".png"));
-        cardGraphics.dispose();
-
-        int sheetX = ((card.getNumber() - 1) % numberOfCardsWide) * (cardWidth + 1);
-        int sheetY = (((card.getNumber() - 1) / numberOfCardsWide) % numberOfCardsHigh) * (cardHeight + 1);
-        sheetGraphics.drawImage(cardImage, sheetX, sheetY, null);
-        sheetGraphics.drawImage(ImageIO.read(new File("./input/overlay.png")), sheetX, sheetY, null);
     }
 
     void drawText(Graphics g, String text, Rectangle rectangle, int fontsize) {
@@ -223,12 +222,10 @@ public class DrawCards {
         List<Card> cards = new ArrayList<>();
 
         try (CSVReader reader = new CSVReader(new FileReader("./input/cardList.csv"))) {
-            int number = 1;
             String[] line;
             while ((line = reader.readNext()) != null) {
                 Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
-                cards.add(new Card(cardType, number, line[1], line[2], line[3], line[4]));
-                number++;
+                cards.add(new Card(cardType, line[1], line[2], line[3], line[4]));
             }
         } catch (IOException | CsvValidationException e) {
             System.err.println(e.getMessage());
