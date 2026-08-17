@@ -33,6 +33,9 @@ public class DrawCards {
     static int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
     static int artWidth = 724;
     static int artHeight = 543;
+    static boolean pixelateCard = true;
+    static int pixelateToWidth = 400;
+    static int pixelateToHeight = 300;
 
     public void drawCardsAndSheets() throws IOException {
         System.out.println(new Date());
@@ -205,10 +208,14 @@ public class DrawCards {
     }
 
     BufferedImage pixelateImage(BufferedImage image) {
-        return resizeImage(
-                resizeImage(image, 400, 300),
-                artWidth,
-                artHeight);
+        if (pixelateCard) {
+            return resizeImage(
+                    resizeImage(image, pixelateToWidth, pixelateToHeight),
+                    artWidth,
+                    artHeight);
+        } else {
+            return resizeImage(image, artWidth, artHeight);
+        }
     }
 
     BufferedImage resizeImage(BufferedImage image, int width, int height) {
