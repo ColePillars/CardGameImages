@@ -69,19 +69,34 @@ public class DrawCards {
 
     void drawCard(Card card, Graphics cardGraphics) throws IOException {
         cardGraphics.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
-        drawText(cardGraphics, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
-        drawText(cardGraphics, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
-        drawText(cardGraphics, card.getText(), new Rectangle(10, 673, 724, 356), 55);
+        basicDrawText(cardGraphics, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
+        basicDrawText(cardGraphics, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
+        basicDrawText(cardGraphics, card.getCardName(), new Rectangle(123, 673, 498, 80), 60);
+        wrapDrawText(cardGraphics, card.getText(), new Rectangle(10, 763, 724, 266));
         drawSymbols(cardGraphics, card);
         drawArt(cardGraphics, card);
     }
 
-    void drawText(Graphics g, String text, Rectangle rectangle, int fontsize) {
+    void wrapDrawText(Graphics g, String text, Rectangle rectangle) {
+        String[] lines = WordUtils.wrap(text, 25, "\n", true).split("\n");
+        if (lines.length <= 3) {
+            drawText(g, lines, rectangle, 55);
+        } else if (lines.length == 4) {
+            drawText(g, WordUtils.wrap(text, 28, "\n", true).split("\n"), rectangle, 50);
+        } else {
+            drawText(g, WordUtils.wrap(text, 31, "\n", true).split("\n"), rectangle, 45);
+        }
+    }
+
+    void basicDrawText(Graphics g, String text, Rectangle rectangle, int fontsize) {
+        drawText(g, new String[] {text}, rectangle, fontsize);
+    }
+
+    void drawText(Graphics g, String[] lines, Rectangle rectangle, int fontsize) {
         Font font = new Font(null, Font.PLAIN, fontsize);
         FontMetrics metrics = g.getFontMetrics(font);
         g.setFont(font);
 
-        String[] lines = WordUtils.wrap(text, 25, "\n", true).split("\n");
         int multiLineOffset = (lines.length - 1) * metrics.getHeight() * -1 / 2;
 
         for (String line : lines) {
