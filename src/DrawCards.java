@@ -225,7 +225,7 @@ public class DrawCards {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
-                cards.add(new Card(cardType, line[1], line[2], line[3], line[4]));
+                cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5]));
             }
         } catch (IOException | CsvValidationException e) {
             System.err.println(e.getMessage());

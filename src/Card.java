@@ -3,13 +3,15 @@ public class Card {
     String points;
     String symbols;
     String artName;
+    String cardName;
     String text;
 
-    public Card(CardType type, String points, String symbols, String artName, String text) {
+    public Card(CardType type, String points, String symbols, String artName, String cardName, String text) {
         this.type = type;
         this.points = points;
         this.symbols = symbols;
         this.artName = artName;
+        this.cardName = cardName;
         this.text = text;
     }
 
@@ -43,6 +45,14 @@ public class Card {
 
     public void setArtName(String artName) {
         this.artName = artName;
+    }
+
+    public String getCardName() {
+        return cardName;
+    }
+
+    public void setCardName(String cardName) {
+        this.cardName = cardName;
     }
 
     public String getText() {
