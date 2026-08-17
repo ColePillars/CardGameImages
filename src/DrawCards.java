@@ -72,7 +72,7 @@ public class DrawCards {
         drawText(cardGraphics, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
         drawText(cardGraphics, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
         drawText(cardGraphics, card.getText(), new Rectangle(10, 673, 724, 356), 55);
-        drawSlots(cardGraphics, card);
+        drawSymbols(cardGraphics, card);
         drawArt(cardGraphics, card);
     }
 
@@ -93,20 +93,20 @@ public class DrawCards {
         }
     }
 
-    void drawSlots(Graphics g, Card card) throws IOException {
-        if (card.getSlots() == null || card.getSlots().length() > 6 || card.getSlots().isEmpty()) {
-            throw new RuntimeException("incompatible slots in: " + card.getSlots());
+    void drawSymbols(Graphics g, Card card) throws IOException {
+        if (card.getSymbols() == null || card.getSymbols().length() > 6 || card.getSymbols().isEmpty()) {
+            throw new RuntimeException("incompatible symbols in: " + card.getSymbols());
         }
 
         if (card.getType().equals(Card.CardType.BAG)) {
-            List<Character> slotsList = orderColors(card.getSlots());
+            List<Character> symbolList = orderColors(card.getSymbols());
 
-            int horizontalOffset = 373 - 41 * slotsList.size();
+            int horizontalOffset = 373 - 41 * symbolList.size();
             int verticalOffset = 20;
 
-            for (char slot : slotsList) {
+            for (char symbol : symbolList) {
                 g.drawImage(
-                        ImageIO.read(new File("./input/symbol/" + slot + "B.png")),
+                        ImageIO.read(new File("./input/symbol/" + symbol + "B.png")),
                         horizontalOffset,
                         verticalOffset,
                         null);
@@ -115,7 +115,7 @@ public class DrawCards {
             }
         } else if (card.getType().equals(Card.CardType.CHARM)) {
             g.drawImage(
-                    ImageIO.read(new File("./input/symbol/" + card.getSlots() + "C.png")),
+                    ImageIO.read(new File("./input/symbol/" + card.getSymbols() + "C.png")),
                     332,
                     20,
                     null);
@@ -136,19 +136,19 @@ public class DrawCards {
         g.drawImage(pixelateImage(art), 10, 120, null);
     }
 
-    List<Character> orderColors(String slots) throws IOException {
-        List<Character> reorderedSlots = new ArrayList<>();
+    List<Character> orderColors(String symbols) throws IOException {
+        List<Character> reorderedSymbols = new ArrayList<>();
         StringBuilder stringBuilder = new StringBuilder();
 
-        for (char ch : slots.toCharArray()) {
+        for (char ch : symbols.toCharArray()) {
             if (ch == 'W') {
-                reorderedSlots.add(ch);
+                reorderedSymbols.add(ch);
             } else if ("PUGYOR".indexOf(ch) >= 0) {
                 stringBuilder.append(ch);
             }
         }
 
-        String coloredSlots = stringBuilder.toString();
+        String coloredSymbols = stringBuilder.toString();
 
         String colorOrder =
                 Files.readAllLines(
@@ -156,12 +156,12 @@ public class DrawCards {
                                         "input/colorOrders.txt").toPath(),
                                 Charset.defaultCharset())
                         .stream()
-                        .filter(string -> similarStrings(coloredSlots, string))
+                        .filter(string -> similarStrings(coloredSymbols, string))
                         .findFirst()
                         .orElse("");
 
         List<Character> charList =
-                coloredSlots.chars()
+                coloredSymbols.chars()
                         .mapToObj(e -> (char) e)
                         .sorted(
                                 (obj1, obj2) -> {
@@ -171,8 +171,8 @@ public class DrawCards {
                                 })
                         .collect(Collectors.toList());
 
-        reorderedSlots.addAll(charList);
-        return reorderedSlots;
+        reorderedSymbols.addAll(charList);
+        return reorderedSymbols;
     }
 
     boolean similarStrings(String s1, String s2) {
