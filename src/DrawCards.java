@@ -24,18 +24,26 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class DrawCards {
-    static int cardWidth = 744;
-    static int cardHeight = 1039;
-    static int sheetWidth = 2550;
-    static int sheetHeight = 3300;
-    static int numberOfCardsWide = 3;
-    static int numberOfCardsHigh = 3;
-    static int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
-    static int artWidth = 724;
-    static int artHeight = 543;
-    static boolean pixelateCard = true;
-    static int pixelateToWidth = 400;
-    static int pixelateToHeight = 300;
+    private static final Rectangle typeRectangle = new Rectangle(10, 10, 100, 100);
+    private static final int typeFontSize = 100;
+    private static final Rectangle pointsRectangle = new Rectangle(634, 10, 100, 100);
+    private static final int pointsFontSize = 100;
+    private static final Rectangle nameRectangle = new Rectangle(122, 673, 500, 80);
+    private static final int nameFontSize = 60;
+    private static final Rectangle textRectangle = new Rectangle(10, 763, 724, 266);
+    private static final Rectangle artRectangle = new Rectangle(10, 120, 724, 543);
+
+    private static final int cardWidth = 744;
+    private static final int cardHeight = 1039;
+    private static final int sheetWidth = 2550;
+    private static final int sheetHeight = 3300;
+    private static final int numberOfCardsWide = 3;
+    private static final int numberOfCardsHigh = 3;
+    private static final int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
+
+    private static final int pixelateToWidth = 400;
+    private static final int pixelateToHeight = 300;
+    private static final boolean pixelateCard = true;
 
     public void drawCardsAndSheets() throws IOException {
         System.out.println(new Date());
@@ -72,10 +80,10 @@ public class DrawCards {
 
     void drawCard(Card card, Graphics cardGraphics) throws IOException {
         cardGraphics.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
-        basicDrawText(cardGraphics, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
-        basicDrawText(cardGraphics, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
-        basicDrawText(cardGraphics, card.getCardName(), new Rectangle(123, 673, 498, 80), 60);
-        wrapDrawText(cardGraphics, card.getText(), new Rectangle(10, 763, 724, 266));
+        basicDrawText(cardGraphics, card.getTypeString(), typeRectangle, typeFontSize);
+        basicDrawText(cardGraphics, card.getPoints(), pointsRectangle, pointsFontSize);
+        basicDrawText(cardGraphics, card.getCardName(), nameRectangle, nameFontSize);
+        wrapDrawText(cardGraphics, card.getText(), textRectangle);
         drawSymbols(cardGraphics, card);
         drawArt(cardGraphics, card);
     }
@@ -92,7 +100,7 @@ public class DrawCards {
     }
 
     void basicDrawText(Graphics g, String text, Rectangle rectangle, int fontsize) {
-        drawText(g, new String[] {text}, rectangle, fontsize);
+        drawText(g, new String[]{text}, rectangle, fontsize);
     }
 
     void drawText(Graphics g, String[] lines, Rectangle rectangle, int fontsize) {
@@ -151,7 +159,7 @@ public class DrawCards {
             art = ImageIO.read(new File("./input/charm.png"));
         }
 
-        g.drawImage(pixelateImage(art), 10, 120, null);
+        g.drawImage(pixelateImage(art), (int) artRectangle.getX(), (int) artRectangle.getY(), null);
     }
 
     List<Character> orderColors(String symbols) throws IOException {
@@ -211,23 +219,23 @@ public class DrawCards {
         if (pixelateCard) {
             return resizeImage(
                     resizeImage(image, pixelateToWidth, pixelateToHeight),
-                    artWidth,
-                    artHeight);
+                    artRectangle.getWidth(),
+                    artRectangle.getHeight());
         } else {
-            return resizeImage(image, artWidth, artHeight);
+            return resizeImage(image, artRectangle.getWidth(), artRectangle.getHeight());
         }
     }
 
-    BufferedImage resizeImage(BufferedImage image, int width, int height) {
+    BufferedImage resizeImage(BufferedImage image, double width, double height) {
         if (image.getWidth() == width && image.getHeight() == height) {
             return image;
         }
 
         AffineTransform scalingTransform = new AffineTransform();
-        scalingTransform.scale((double) width / image.getWidth(), (double) height / image.getHeight());
+        scalingTransform.scale(width / image.getWidth(), height / image.getHeight());
         AffineTransformOp scaleOp = new AffineTransformOp(scalingTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
 
-        return scaleOp.filter(image, new BufferedImage(width, height, image.getType()));
+        return scaleOp.filter(image, new BufferedImage((int) width, (int) height, image.getType()));
     }
 
     String outputDir() {
