@@ -14,14 +14,11 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class DrawCards {
     private static final Rectangle typeRectangle = new Rectangle(10, 10, 100, 100);
@@ -133,8 +130,8 @@ public class DrawCards {
             throw new RuntimeException("incompatible symbols in: " + card.getSymbols());
         }
 
-        List<Character> symbolList = orderColors(card.getSymbols());
-        int symbolCount = card.getType().equals(Card.CardType.BAG) ? symbolList.size() : 1;
+        char[] symbolArray = card.getSymbols().toCharArray();
+        int symbolCount = card.getType().equals(Card.CardType.BAG) ? symbolArray.length : 1;
         int horizontalOffset =
                 (int) (symbolsRectangle.getX()
                         + ((symbolsRectangle.getWidth() - symbolWidth) / 2)
@@ -144,7 +141,7 @@ public class DrawCards {
                         + (symbolsRectangle.getHeight() - symbolHeight) / 2);
 
         if (card.getType().equals(Card.CardType.BAG)) {
-            for (char symbol : symbolList) {
+            for (char symbol : symbolArray) {
                 g.drawImage(
                         ImageIO.read(new File("./input/symbol/" + symbol + "B.png")),
                         horizontalOffset,
@@ -174,69 +171,6 @@ public class DrawCards {
         }
 
         g.drawImage(pixelateImage(art), (int) artRectangle.getX(), (int) artRectangle.getY(), null);
-    }
-
-    List<Character> orderColors(String symbols) throws IOException {
-        List<Character> reorderedSymbols = new ArrayList<>();
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (char ch : symbols.toCharArray()) {
-            if (ch == 'W') {
-                reorderedSymbols.add(ch);
-            } else if ("PUGYOR".indexOf(ch) >= 0) {
-                stringBuilder.append(ch);
-            }
-        }
-
-        String coloredSymbols = stringBuilder.toString();
-
-        if (coloredSymbols.isEmpty()) {
-            return reorderedSymbols;
-        } else if (coloredSymbols.length() == 1) {
-            reorderedSymbols.add(coloredSymbols.charAt(0));
-            return reorderedSymbols;
-        } else if (coloredSymbols.chars().allMatch(c -> c == coloredSymbols.charAt(0))) {
-            reorderedSymbols.addAll(coloredSymbols.chars().mapToObj(e -> (char) e).collect(Collectors.toList()));
-            return reorderedSymbols;
-        }
-
-        String colorOrder =
-                Files.readAllLines(
-                                new File(
-                                        "input/colorOrders.txt").toPath(),
-                                Charset.defaultCharset())
-                        .stream()
-                        .filter(string -> similarStrings(coloredSymbols, string))
-                        .findFirst()
-                        .orElse("");
-
-        List<Character> charList =
-                coloredSymbols.chars()
-                        .mapToObj(e -> (char) e)
-                        .sorted(
-                                (obj1, obj2) -> {
-                                    int index1 = colorOrder.indexOf(obj1);
-                                    int index2 = colorOrder.indexOf(obj2);
-                                    return Integer.compare(index1, index2);
-                                })
-                        .collect(Collectors.toList());
-
-        reorderedSymbols.addAll(charList);
-        return reorderedSymbols;
-    }
-
-    boolean similarStrings(String s1, String s2) {
-        for (char ch : s1.toCharArray()) {
-            if (s2.indexOf(ch) < 0) {
-                return false;
-            }
-        }
-        for (char ch : s2.toCharArray()) {
-            if (s1.indexOf(ch) < 0) {
-                return false;
-            }
-        }
-        return true;
     }
 
     BufferedImage pixelateImage(BufferedImage image) {
