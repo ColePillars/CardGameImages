@@ -1,18 +1,30 @@
 public class Card {
-    CardType type;
-    String points;
-    String symbols;
-    String artName;
-    String cardName;
-    String text;
+    private CardType type;
+    private String points;
+    private String symbols;
+    private String artName;
+    private String cardName;
+    private String text;
+    private String wrapLength;
+    private String fontSize;
 
-    public Card(CardType type, String points, String symbols, String artName, String cardName, String text) {
+    public Card(
+            CardType type,
+            String points,
+            String symbols,
+            String artName,
+            String cardName,
+            String text,
+            String wrapLength,
+            String fontSize) {
         this.type = type;
         this.points = points;
         this.symbols = symbols;
         this.artName = artName;
         this.cardName = cardName;
         this.text = text;
+        this.wrapLength = wrapLength;
+        this.fontSize = fontSize;
     }
 
     public CardType getType() {
@@ -61,6 +73,22 @@ public class Card {
 
     public void setText(String text) {
         this.text = text;
+    }
+
+    public String getFontSize() {
+        return fontSize;
+    }
+
+    public void setFontSize(String fontSize) {
+        this.fontSize = fontSize;
+    }
+
+    public String getWrapLength() {
+        return wrapLength;
+    }
+
+    public void setWrapLength(String wrapLength) {
+        this.wrapLength = wrapLength;
     }
 
     public String getTypeString() {

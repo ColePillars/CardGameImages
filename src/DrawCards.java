@@ -91,17 +91,23 @@ public class DrawCards {
         basicDrawText(cardGraphics, card.getPoints(), pointsRectangle, pointsFontSize);
         basicDrawText(cardGraphics, card.getCardName(), nameRectangle, nameFontSize);
         drawArt(cardGraphics, card);
-        wrapDrawText(cardGraphics, card.getText(), textRectangle);
+        wrapDrawText(cardGraphics, card, textRectangle);
     }
 
-    void wrapDrawText(Graphics g, String text, Rectangle rectangle) {
-        String[] lines = WordUtils.wrap(text, 25, "\n", true).split("\n");
-        if (lines.length <= 3) {
-            drawText(g, lines, rectangle, 55);
-        } else if (lines.length == 4) {
-            drawText(g, WordUtils.wrap(text, 28, "\n", true).split("\n"), rectangle, 50);
+    void wrapDrawText(Graphics g, Card card, Rectangle rectangle) {
+        if (!card.getWrapLength().isEmpty() && !card.getFontSize().isEmpty()) {
+            drawText(g, WordUtils.wrap(card.getText(), Integer.parseInt(card.getWrapLength()), "\n", true).split("\n"), rectangle, Integer.parseInt(card.getFontSize()));
         } else {
-            drawText(g, WordUtils.wrap(text, 31, "\n", true).split("\n"), rectangle, 45);
+            String[] lines = WordUtils.wrap(card.getText(), 25, "\n", true).split("\n");
+            if (lines.length <= 3) {
+                drawText(g, lines, rectangle, 55);
+            } else if (lines.length == 4) {
+                drawText(g, WordUtils.wrap(card.getText(), 28, "\n", true).split("\n"), rectangle, 50);
+            } else if (lines.length == 5) {
+                drawText(g, WordUtils.wrap(card.getText(), 35, "\n", true).split("\n"), rectangle, 45);
+            } else {
+                drawText(g, WordUtils.wrap(card.getText(), 38, "\n", true).split("\n"), rectangle, 40);
+            }
         }
     }
 
@@ -214,7 +220,7 @@ public class DrawCards {
             while ((line = reader.readNext()) != null) {
                 if (!line[0].isEmpty() && !line[1].isEmpty() && !line[2].isEmpty()) {
                     Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
-                    cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5]));
+                    cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5], line[6], line[7]));
                 }
             }
         } catch (IOException | CsvValidationException e) {
