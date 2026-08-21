@@ -14,28 +14,42 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class DrawCards {
-    static int cardWidth = 744;
-    static int cardHeight = 1039;
-    static int sheetWidth = 2550;
-    static int sheetHeight = 3300;
-    static int numberOfCardsWide = 3;
-    static int numberOfCardsHigh = 3;
-    static int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
-    static int artWidth = 724;
-    static int artHeight = 543;
-    static boolean pixelateCard = true;
-    static int pixelateToWidth = 400;
-    static int pixelateToHeight = 300;
+    private static final Rectangle typeRectangle = new Rectangle(10, 10, 100, 100);
+    private static final int typeFontSize = 100;
+
+    private static final Rectangle symbolsRectangle = new Rectangle(120, 10, 504, 100);
+    private static final int symbolWidth = 80;
+    private static final int symbolHeight = 80;
+    private static final int symbolHorizontalPadding = 2;
+
+    private static final Rectangle pointsRectangle = new Rectangle(634, 10, 100, 100);
+    private static final int pointsFontSize = 100;
+
+    private static final Rectangle artRectangle = new Rectangle(10, 120, 724, 543);
+
+    private static final Rectangle nameRectangle = new Rectangle(122, 673, 500, 80);
+    private static final int nameFontSize = 60;
+
+    private static final Rectangle textRectangle = new Rectangle(10, 763, 724, 266);
+
+    private static final int cardWidth = 744;
+    private static final int cardHeight = 1039;
+    private static final int sheetWidth = 2550;
+    private static final int sheetHeight = 3300;
+    private static final int numberOfCardsWide = 3;
+    private static final int numberOfCardsHigh = 3;
+    private static final int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
+
+    private static final int pixelateToWidth = 400;
+    private static final int pixelateToHeight = 300;
+    private static final boolean pixelateCard = true;
 
     public void drawCardsAndSheets() throws IOException {
         System.out.println(new Date());
@@ -72,19 +86,40 @@ public class DrawCards {
 
     void drawCard(Card card, Graphics cardGraphics) throws IOException {
         cardGraphics.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
-        drawText(cardGraphics, card.getTypeString(), new Rectangle(10, 10, 100, 100), 100);
-        drawText(cardGraphics, card.getPoints(), new Rectangle(634, 10, 100, 100), 100);
-        drawText(cardGraphics, card.getText(), new Rectangle(10, 673, 724, 356), 55);
+        basicDrawText(cardGraphics, card.getTypeString(), typeRectangle, typeFontSize);
         drawSymbols(cardGraphics, card);
+        basicDrawText(cardGraphics, card.getPoints(), pointsRectangle, pointsFontSize);
+        basicDrawText(cardGraphics, card.getCardName(), nameRectangle, nameFontSize);
         drawArt(cardGraphics, card);
+        wrapDrawText(cardGraphics, card, textRectangle);
     }
 
-    void drawText(Graphics g, String text, Rectangle rectangle, int fontsize) {
+    void wrapDrawText(Graphics g, Card card, Rectangle rectangle) {
+        if (!card.getWrapLength().isEmpty() && !card.getFontSize().isEmpty()) {
+            drawText(g, WordUtils.wrap(card.getText(), Integer.parseInt(card.getWrapLength()), "\n", true).split("\n"), rectangle, Integer.parseInt(card.getFontSize()));
+        } else {
+            String[] lines = WordUtils.wrap(card.getText(), 25, "\n", true).split("\n");
+            if (lines.length <= 3) {
+                drawText(g, lines, rectangle, 55);
+            } else if (lines.length == 4) {
+                drawText(g, WordUtils.wrap(card.getText(), 28, "\n", true).split("\n"), rectangle, 50);
+            } else if (lines.length == 5) {
+                drawText(g, WordUtils.wrap(card.getText(), 35, "\n", true).split("\n"), rectangle, 45);
+            } else {
+                drawText(g, WordUtils.wrap(card.getText(), 38, "\n", true).split("\n"), rectangle, 40);
+            }
+        }
+    }
+
+    void basicDrawText(Graphics g, String text, Rectangle rectangle, int fontsize) {
+        drawText(g, new String[]{text}, rectangle, fontsize);
+    }
+
+    void drawText(Graphics g, String[] lines, Rectangle rectangle, int fontsize) {
         Font font = new Font(null, Font.PLAIN, fontsize);
         FontMetrics metrics = g.getFontMetrics(font);
         g.setFont(font);
 
-        String[] lines = WordUtils.wrap(text, 25, "\n", true).split("\n");
         int multiLineOffset = (lines.length - 1) * metrics.getHeight() * -1 / 2;
 
         for (String line : lines) {
@@ -101,26 +136,31 @@ public class DrawCards {
             throw new RuntimeException("incompatible symbols in: " + card.getSymbols());
         }
 
+        char[] symbolArray = card.getSymbols().toCharArray();
+        int symbolCount = card.getType().equals(Card.CardType.BAG) ? symbolArray.length : 1;
+        int horizontalOffset =
+                (int) (symbolsRectangle.getX()
+                        + ((symbolsRectangle.getWidth() - symbolWidth) / 2)
+                        - ((symbolCount - 1) * ((double) (symbolWidth + symbolHorizontalPadding) / 2)));
+        int verticalOffset =
+                (int) (symbolsRectangle.getY()
+                        + (symbolsRectangle.getHeight() - symbolHeight) / 2);
+
         if (card.getType().equals(Card.CardType.BAG)) {
-            List<Character> symbolList = orderColors(card.getSymbols());
-
-            int horizontalOffset = 373 - 41 * symbolList.size();
-            int verticalOffset = 20;
-
-            for (char symbol : symbolList) {
+            for (char symbol : symbolArray) {
                 g.drawImage(
                         ImageIO.read(new File("./input/symbol/" + symbol + "B.png")),
                         horizontalOffset,
                         verticalOffset,
                         null);
 
-                horizontalOffset += 82;
+                horizontalOffset += symbolWidth + symbolHorizontalPadding;
             }
         } else if (card.getType().equals(Card.CardType.CHARM)) {
             g.drawImage(
                     ImageIO.read(new File("./input/symbol/" + card.getSymbols() + "C.png")),
-                    332,
-                    20,
+                    horizontalOffset,
+                    verticalOffset,
                     null);
         }
     }
@@ -136,83 +176,30 @@ public class DrawCards {
             art = ImageIO.read(new File("./input/charm.png"));
         }
 
-        g.drawImage(pixelateImage(art), 10, 120, null);
-    }
-
-    List<Character> orderColors(String symbols) throws IOException {
-        List<Character> reorderedSymbols = new ArrayList<>();
-        StringBuilder stringBuilder = new StringBuilder();
-
-        for (char ch : symbols.toCharArray()) {
-            if (ch == 'W') {
-                reorderedSymbols.add(ch);
-            } else if ("PUGYOR".indexOf(ch) >= 0) {
-                stringBuilder.append(ch);
-            }
-        }
-
-        String coloredSymbols = stringBuilder.toString();
-
-        String colorOrder =
-                Files.readAllLines(
-                                new File(
-                                        "input/colorOrders.txt").toPath(),
-                                Charset.defaultCharset())
-                        .stream()
-                        .filter(string -> similarStrings(coloredSymbols, string))
-                        .findFirst()
-                        .orElse("");
-
-        List<Character> charList =
-                coloredSymbols.chars()
-                        .mapToObj(e -> (char) e)
-                        .sorted(
-                                (obj1, obj2) -> {
-                                    int index1 = colorOrder.indexOf(obj1);
-                                    int index2 = colorOrder.indexOf(obj2);
-                                    return Integer.compare(index1, index2);
-                                })
-                        .collect(Collectors.toList());
-
-        reorderedSymbols.addAll(charList);
-        return reorderedSymbols;
-    }
-
-    boolean similarStrings(String s1, String s2) {
-        for (char ch : s1.toCharArray()) {
-            if (s2.indexOf(ch) < 0) {
-                return false;
-            }
-        }
-        for (char ch : s2.toCharArray()) {
-            if (s1.indexOf(ch) < 0) {
-                return false;
-            }
-        }
-        return true;
+        g.drawImage(pixelateImage(art), (int) artRectangle.getX(), (int) artRectangle.getY(), null);
     }
 
     BufferedImage pixelateImage(BufferedImage image) {
         if (pixelateCard) {
             return resizeImage(
                     resizeImage(image, pixelateToWidth, pixelateToHeight),
-                    artWidth,
-                    artHeight);
+                    artRectangle.getWidth(),
+                    artRectangle.getHeight());
         } else {
-            return resizeImage(image, artWidth, artHeight);
+            return resizeImage(image, artRectangle.getWidth(), artRectangle.getHeight());
         }
     }
 
-    BufferedImage resizeImage(BufferedImage image, int width, int height) {
+    BufferedImage resizeImage(BufferedImage image, double width, double height) {
         if (image.getWidth() == width && image.getHeight() == height) {
             return image;
         }
 
         AffineTransform scalingTransform = new AffineTransform();
-        scalingTransform.scale((double) width / image.getWidth(), (double) height / image.getHeight());
+        scalingTransform.scale(width / image.getWidth(), height / image.getHeight());
         AffineTransformOp scaleOp = new AffineTransformOp(scalingTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
 
-        return scaleOp.filter(image, new BufferedImage(width, height, image.getType()));
+        return scaleOp.filter(image, new BufferedImage((int) width, (int) height, image.getType()));
     }
 
     String outputDir() {
@@ -231,8 +218,10 @@ public class DrawCards {
         try (CSVReader reader = new CSVReader(new FileReader("./input/cardList.csv"))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
-                Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
-                cards.add(new Card(cardType, line[1], line[2], line[3], line[4]));
+                if (!line[0].isEmpty() && !line[1].isEmpty() && !line[2].isEmpty()) {
+                    Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
+                    cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5], line[6], line[7]));
+                }
             }
         } catch (IOException | CsvValidationException e) {
             System.err.println(e.getMessage());
