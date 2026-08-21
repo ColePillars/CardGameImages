@@ -212,8 +212,10 @@ public class DrawCards {
         try (CSVReader reader = new CSVReader(new FileReader("./input/cardList.csv"))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
-                Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
-                cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5]));
+                if (!line[0].isEmpty() && !line[1].isEmpty() && !line[2].isEmpty()) {
+                    Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
+                    cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5]));
+                }
             }
         } catch (IOException | CsvValidationException e) {
             System.err.println(e.getMessage());
