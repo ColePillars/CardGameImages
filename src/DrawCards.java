@@ -26,12 +26,21 @@ import java.util.stream.Collectors;
 public class DrawCards {
     private static final Rectangle typeRectangle = new Rectangle(10, 10, 100, 100);
     private static final int typeFontSize = 100;
+
+    private static final Rectangle symbolsRectangle = new Rectangle(120, 10, 504, 100);
+    private static final int symbolWidth = 80;
+    private static final int symbolHeight = 80;
+    private static final int symbolHorizontalPadding = 2;
+
     private static final Rectangle pointsRectangle = new Rectangle(634, 10, 100, 100);
     private static final int pointsFontSize = 100;
+
+    private static final Rectangle artRectangle = new Rectangle(10, 120, 724, 543);
+
     private static final Rectangle nameRectangle = new Rectangle(122, 673, 500, 80);
     private static final int nameFontSize = 60;
+
     private static final Rectangle textRectangle = new Rectangle(10, 763, 724, 266);
-    private static final Rectangle artRectangle = new Rectangle(10, 120, 724, 543);
 
     private static final int cardWidth = 744;
     private static final int cardHeight = 1039;
@@ -81,11 +90,11 @@ public class DrawCards {
     void drawCard(Card card, Graphics cardGraphics) throws IOException {
         cardGraphics.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
         basicDrawText(cardGraphics, card.getTypeString(), typeRectangle, typeFontSize);
+        drawSymbols(cardGraphics, card);
         basicDrawText(cardGraphics, card.getPoints(), pointsRectangle, pointsFontSize);
         basicDrawText(cardGraphics, card.getCardName(), nameRectangle, nameFontSize);
-        wrapDrawText(cardGraphics, card.getText(), textRectangle);
-        drawSymbols(cardGraphics, card);
         drawArt(cardGraphics, card);
+        wrapDrawText(cardGraphics, card.getText(), textRectangle);
     }
 
     void wrapDrawText(Graphics g, String text, Rectangle rectangle) {
@@ -124,12 +133,17 @@ public class DrawCards {
             throw new RuntimeException("incompatible symbols in: " + card.getSymbols());
         }
 
+        List<Character> symbolList = orderColors(card.getSymbols());
+        int symbolCount = card.getType().equals(Card.CardType.BAG) ? symbolList.size() : 1;
+        int horizontalOffset =
+                (int) (symbolsRectangle.getX()
+                        + ((symbolsRectangle.getWidth() - symbolWidth) / 2)
+                        - ((symbolCount - 1) * ((double) (symbolWidth + symbolHorizontalPadding) / 2)));
+        int verticalOffset =
+                (int) (symbolsRectangle.getY()
+                        + (symbolsRectangle.getHeight() - symbolHeight) / 2);
+
         if (card.getType().equals(Card.CardType.BAG)) {
-            List<Character> symbolList = orderColors(card.getSymbols());
-
-            int horizontalOffset = 373 - 41 * symbolList.size();
-            int verticalOffset = 20;
-
             for (char symbol : symbolList) {
                 g.drawImage(
                         ImageIO.read(new File("./input/symbol/" + symbol + "B.png")),
@@ -137,13 +151,13 @@ public class DrawCards {
                         verticalOffset,
                         null);
 
-                horizontalOffset += 82;
+                horizontalOffset += symbolWidth + symbolHorizontalPadding;
             }
         } else if (card.getType().equals(Card.CardType.CHARM)) {
             g.drawImage(
                     ImageIO.read(new File("./input/symbol/" + card.getSymbols() + "C.png")),
-                    332,
-                    20,
+                    horizontalOffset,
+                    verticalOffset,
                     null);
         }
     }
@@ -175,6 +189,16 @@ public class DrawCards {
         }
 
         String coloredSymbols = stringBuilder.toString();
+
+        if (coloredSymbols.isEmpty()) {
+            return reorderedSymbols;
+        } else if (coloredSymbols.length() == 1) {
+            reorderedSymbols.add(coloredSymbols.charAt(0));
+            return reorderedSymbols;
+        } else if (coloredSymbols.chars().allMatch(c -> c == coloredSymbols.charAt(0))) {
+            reorderedSymbols.addAll(coloredSymbols.chars().mapToObj(e -> (char) e).collect(Collectors.toList()));
+            return reorderedSymbols;
+        }
 
         String colorOrder =
                 Files.readAllLines(
