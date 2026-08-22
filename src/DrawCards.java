@@ -96,6 +96,9 @@ public class DrawCards {
     }
 
     void wrapDrawText(Graphics g, Card card, Rectangle rectangle) {
+        if (card.getText().isEmpty()) {
+            return;
+        }
         if (!card.getWrapLength().isEmpty() && !card.getFontSize().isEmpty()) {
             String[] lines =
                     Arrays.stream(card.getText().split("\n"))
