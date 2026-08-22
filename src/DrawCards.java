@@ -16,6 +16,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -96,7 +97,11 @@ public class DrawCards {
 
     void wrapDrawText(Graphics g, Card card, Rectangle rectangle) {
         if (!card.getWrapLength().isEmpty() && !card.getFontSize().isEmpty()) {
-            drawText(g, WordUtils.wrap(card.getText(), Integer.parseInt(card.getWrapLength()), "\n", true).split("\n"), rectangle, Integer.parseInt(card.getFontSize()));
+            String[] lines =
+                    Arrays.stream(card.getText().split("\n"))
+                            .flatMap(str -> Arrays.stream(WordUtils.wrap(str, Integer.parseInt(card.getWrapLength()), "\n", true).split("\n")))
+                            .toArray(String[]::new);
+            drawText(g, lines, rectangle, Integer.parseInt(card.getFontSize()));
         } else {
             String[] lines = WordUtils.wrap(card.getText(), 25, "\n", true).split("\n");
             if (lines.length <= 3) {
