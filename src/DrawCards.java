@@ -50,7 +50,7 @@ public class DrawCards {
 
     private static final int pixelateToWidth = 400;
     private static final int pixelateToHeight = 300;
-    private static final boolean pixelateCard = true;
+    private static final boolean pixelateCard = false;
 
     public void drawCardsAndSheets() throws IOException {
         System.out.println(new Date());
