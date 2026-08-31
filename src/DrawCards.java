@@ -47,6 +47,8 @@ public class DrawCards {
     private static final int numberOfCardsWide = 3;
     private static final int numberOfCardsHigh = 3;
     private static final int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
+    private static final boolean createImageFiles = true;
+    private static final boolean createSheetFiles = true;
 
     private static final int pixelateToWidth = 400;
     private static final int pixelateToHeight = 300;
@@ -67,17 +69,21 @@ public class DrawCards {
 
         for (int i = 1; i <= cards.size(); i++) {
             drawCard(cards.get(i - 1), cardGraphics);
-            ImageIO.write(cardImage, "PNG", new File(outputDir, i + ".png"));
-            int sheetX = ((i - 1) % numberOfCardsWide) * (cardWidth + 1);
-            int sheetY = (((i - 1) / numberOfCardsWide) % numberOfCardsHigh) * (cardHeight + 1);
-            sheetGraphics.drawImage(cardImage, sheetX, sheetY, null);
-            sheetGraphics.drawImage(ImageIO.read(new File("./input/overlay.png")), sheetX, sheetY, null);
+            if (createImageFiles) {
+                ImageIO.write(cardImage, "PNG", new File(outputDir, i + ".png"));
+            }
+            if (createSheetFiles) {
+                int sheetX = ((i - 1) % numberOfCardsWide) * (cardWidth + 1);
+                int sheetY = (((i - 1) / numberOfCardsWide) % numberOfCardsHigh) * (cardHeight + 1);
+                sheetGraphics.drawImage(cardImage, sheetX, sheetY, null);
+                sheetGraphics.drawImage(ImageIO.read(new File("./input/overlay.png")), sheetX, sheetY, null);
 
-            if (i % numberOfCardsSheet == 0) {
-                ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + i / numberOfCardsSheet + ".png"));
-                sheetGraphics.fillRect(0, 0, sheetWidth, sheetHeight);
-            } else if (i == cards.size()) {
-                ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + ((i / numberOfCardsSheet) + 1) + ".png"));
+                if (i % numberOfCardsSheet == 0) {
+                    ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + i / numberOfCardsSheet + ".png"));
+                    sheetGraphics.fillRect(0, 0, sheetWidth, sheetHeight);
+                } else if (i == cards.size()) {
+                    ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + ((i / numberOfCardsSheet) + 1) + ".png"));
+                }
             }
         }
         sheetGraphics.dispose();
