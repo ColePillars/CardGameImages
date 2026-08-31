@@ -1,6 +1,7 @@
 import com.opencsv.CSVReader;
 import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.text.WordUtils;
+import org.imgscalr.Scalr;
 
 import javax.imageio.ImageIO;
 import java.awt.Color;
@@ -8,8 +9,6 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
@@ -197,23 +196,18 @@ public class DrawCards {
         if (pixelateCard) {
             return resizeImage(
                     resizeImage(image, pixelateToWidth, pixelateToHeight),
-                    artRectangle.getWidth(),
-                    artRectangle.getHeight());
+                    (int) artRectangle.getWidth(),
+                    (int) artRectangle.getHeight());
         } else {
-            return resizeImage(image, artRectangle.getWidth(), artRectangle.getHeight());
+            return resizeImage(image, (int) artRectangle.getWidth(), (int) artRectangle.getHeight());
         }
     }
 
-    BufferedImage resizeImage(BufferedImage image, double width, double height) {
+    BufferedImage resizeImage(BufferedImage image, int width, int height) {
         if (image.getWidth() == width && image.getHeight() == height) {
             return image;
         }
-
-        AffineTransform scalingTransform = new AffineTransform();
-        scalingTransform.scale(width / image.getWidth(), height / image.getHeight());
-        AffineTransformOp scaleOp = new AffineTransformOp(scalingTransform, AffineTransformOp.TYPE_NEAREST_NEIGHBOR);
-
-        return scaleOp.filter(image, new BufferedImage((int) width, (int) height, image.getType()));
+        return Scalr.resize(image, width, height);
     }
 
     String outputDir() {
