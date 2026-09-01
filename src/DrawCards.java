@@ -75,7 +75,6 @@ public class DrawCards {
                 int sheetX = ((i - 1) % numberOfCardsWide) * (cardWidth + 1);
                 int sheetY = (((i - 1) / numberOfCardsWide) % numberOfCardsHigh) * (cardHeight + 1);
                 sheetGraphics.drawImage(cardImage, sheetX, sheetY, null);
-                sheetGraphics.drawImage(ImageIO.read(new File("./input/overlay.png")), sheetX, sheetY, null);
 
                 if (i % numberOfCardsSheet == 0) {
                     ImageIO.write(sheetImage, "PNG", new File(outputDir, "cardSheet" + i / numberOfCardsSheet + ".png"));
