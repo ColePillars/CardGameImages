@@ -1,5 +1,3 @@
-import com.opencsv.CSVReader;
-import com.opencsv.exceptions.CsvValidationException;
 import org.apache.commons.text.WordUtils;
 import org.imgscalr.Scalr;
 
@@ -11,52 +9,71 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 public class DrawCards {
-    private static final Rectangle typeRectangle = new Rectangle(10, 10, 100, 100);
-    private static final int typeFontSize = 100;
+    public DrawCards(String templateFileName, Rectangle typeRectangle, int typeFontSize, Rectangle symbolsRectangle, int symbolWidth, int symbolHeight, int symbolHorizontalPadding, Rectangle pointsRectangle, int pointsFontSize, Rectangle artRectangle, Rectangle nameRectangle, int nameFontSize, Rectangle textRectangle, int cardWidth, int cardHeight, int sheetWidth, int sheetHeight, int numberOfCardsWide, int numberOfCardsHigh, int numberOfCardsSheet, boolean createImageFiles, boolean createSheetFiles, int pixelateToWidth, int pixelateToHeight, boolean pixelateCard) {
+        this.templateFileName = templateFileName;
+        this.typeRectangle = typeRectangle;
+        this.typeFontSize = typeFontSize;
+        this.symbolsRectangle = symbolsRectangle;
+        this.symbolWidth = symbolWidth;
+        this.symbolHeight = symbolHeight;
+        this.symbolHorizontalPadding = symbolHorizontalPadding;
+        this.pointsRectangle = pointsRectangle;
+        this.pointsFontSize = pointsFontSize;
+        this.artRectangle = artRectangle;
+        this.nameRectangle = nameRectangle;
+        this.nameFontSize = nameFontSize;
+        this.textRectangle = textRectangle;
+        this.cardWidth = cardWidth;
+        this.cardHeight = cardHeight;
+        this.sheetWidth = sheetWidth;
+        this.sheetHeight = sheetHeight;
+        this.numberOfCardsWide = numberOfCardsWide;
+        this.numberOfCardsHigh = numberOfCardsHigh;
+        this.numberOfCardsSheet = numberOfCardsSheet;
+        this.createImageFiles = createImageFiles;
+        this.createSheetFiles = createSheetFiles;
+        this.pixelateToWidth = pixelateToWidth;
+        this.pixelateToHeight = pixelateToHeight;
+        this.pixelateCard = pixelateCard;
+    }
 
-    private static final Rectangle symbolsRectangle = new Rectangle(120, 10, 504, 100);
-    private static final int symbolWidth = 80;
-    private static final int symbolHeight = 80;
-    private static final int symbolHorizontalPadding = 2;
+    private final String templateFileName;
+    private final Rectangle typeRectangle;
+    private final int typeFontSize;
+    private final Rectangle symbolsRectangle;
+    private final int symbolWidth;
+    private final int symbolHeight;
+    private final int symbolHorizontalPadding;
+    private final Rectangle pointsRectangle;
+    private final int pointsFontSize;
+    private final Rectangle artRectangle;
+    private final Rectangle nameRectangle;
+    private final int nameFontSize;
+    private final Rectangle textRectangle;
+    private final int cardWidth;
+    private final int cardHeight;
+    private final int sheetWidth;
+    private final int sheetHeight;
+    private final int numberOfCardsWide;
+    private final int numberOfCardsHigh;
+    private final int numberOfCardsSheet;
+    private final boolean createImageFiles;
+    private final boolean createSheetFiles;
+    private final int pixelateToWidth;
+    private final int pixelateToHeight;
+    private final boolean pixelateCard;
 
-    private static final Rectangle pointsRectangle = new Rectangle(634, 10, 100, 100);
-    private static final int pointsFontSize = 100;
+    public void drawCardsAndSheets(List<Card> cards) throws IOException {
+        System.out.println(new Date() + " Start of drawing cards.");
 
-    private static final Rectangle artRectangle = new Rectangle(10, 120, 724, 543);
-
-    private static final Rectangle nameRectangle = new Rectangle(122, 673, 500, 80);
-    private static final int nameFontSize = 60;
-
-    private static final Rectangle textRectangle = new Rectangle(10, 763, 724, 266);
-
-    private static final int cardWidth = 744;
-    private static final int cardHeight = 1039;
-    private static final int sheetWidth = 2550;
-    private static final int sheetHeight = 3300;
-    private static final int numberOfCardsWide = 3;
-    private static final int numberOfCardsHigh = 3;
-    private static final int numberOfCardsSheet = numberOfCardsWide * numberOfCardsHigh;
-    private static final boolean createImageFiles = true;
-    private static final boolean createSheetFiles = true;
-
-    private static final int pixelateToWidth = 400;
-    private static final int pixelateToHeight = 300;
-    private static final boolean pixelateCard = false;
-
-    public void drawCardsAndSheets() throws IOException {
-        System.out.println(new Date());
         String outputDir = outputDir();
-        List<Card> cards = parseCardCSV();
 
         BufferedImage sheetImage = new BufferedImage(sheetWidth, sheetHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics sheetGraphics = sheetImage.createGraphics();
@@ -84,13 +101,15 @@ public class DrawCards {
                 }
             }
         }
+
         sheetGraphics.dispose();
         cardGraphics.dispose();
-        System.out.println(new Date());
+
+        System.out.println(new Date() + " End of drawing cards.");
     }
 
     void drawCard(Card card, Graphics cardGraphics) throws IOException {
-        cardGraphics.drawImage(ImageIO.read(new File("./input/base.png")), 0, 0, null);
+        cardGraphics.drawImage(ImageIO.read(new File("./input/" + templateFileName)), 0, 0, null);
         basicDrawText(cardGraphics, card.getTypeString(), typeRectangle, typeFontSize);
         drawSymbols(cardGraphics, card);
         basicDrawText(cardGraphics, card.getPoints(), pointsRectangle, pointsFontSize);
@@ -217,23 +236,5 @@ public class DrawCards {
         } else {
             throw new RuntimeException("Output directory unable to be created");
         }
-    }
-
-    List<Card> parseCardCSV() {
-        List<Card> cards = new ArrayList<>();
-
-        try (CSVReader reader = new CSVReader(new FileReader("./input/cardList.csv"))) {
-            String[] line;
-            while ((line = reader.readNext()) != null) {
-                if (!line[0].isEmpty() && !line[1].isEmpty() && !line[2].isEmpty()) {
-                    Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
-                    cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5], line[6], line[7]));
-                }
-            }
-        } catch (IOException | CsvValidationException e) {
-            System.err.println(e.getMessage());
-        }
-
-        return cards;
     }
 }
