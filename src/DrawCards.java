@@ -150,6 +150,7 @@ public class DrawCards {
         Font font = new Font(null, Font.PLAIN, fontsize);
         FontMetrics metrics = g.getFontMetrics(font);
         g.setFont(font);
+        g.setColor(new Color(238, 238, 236));
 
         int multiLineOffset = (lines.length - 1) * metrics.getHeight() * -1 / 2;
 
