@@ -9,7 +9,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class Main {
     public static void main(String[] args) throws IOException {
@@ -19,6 +18,7 @@ public class Main {
 
         DrawCards drawCards = new DrawCards(
                 map.get("templateFileName"),
+                map.get("reverseFileName"),
                 new Rectangle(
                         Integer.parseInt(map.get("typeRectangleX")),
                         Integer.parseInt(map.get("typeRectangleY")),
@@ -97,8 +97,9 @@ public class Main {
         try (CSVReader reader = new CSVReader(new FileReader("./input/" + fileName))) {
             String[] line;
             while ((line = reader.readNext()) != null) {
-                if (!line[0].isEmpty() && !line[1].isEmpty() && !line[2].isEmpty()) {
-                    Card.CardType cardType = Objects.equals(line[0], "B") ? Card.CardType.BAG : Card.CardType.CHARM;
+                Card.CardType cardType = Card.getTypeFromString(line[0]);
+                if (cardType.equals(Card.CardType.REVERSE)
+                        || (!line[0].isEmpty() && !line[1].isEmpty() && !line[2].isEmpty())) {
                     cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5], line[6], line[7]));
                 }
             }

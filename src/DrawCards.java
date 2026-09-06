@@ -16,8 +16,9 @@ import java.util.Date;
 import java.util.List;
 
 public class DrawCards {
-    public DrawCards(String templateFileName, Rectangle typeRectangle, int typeFontSize, Rectangle symbolsRectangle, int symbolWidth, int symbolHeight, int symbolHorizontalPadding, Rectangle pointsRectangle, int pointsFontSize, Rectangle artRectangle, Rectangle nameRectangle, int nameFontSize, Rectangle textRectangle, int cardWidth, int cardHeight, int sheetWidth, int sheetHeight, int numberOfCardsWide, int numberOfCardsHigh, int numberOfCardsSheet, boolean createImageFiles, boolean createSheetFiles, int pixelateToWidth, int pixelateToHeight, boolean pixelateCard) {
+    public DrawCards(String templateFileName, String reverseFileName, Rectangle typeRectangle, int typeFontSize, Rectangle symbolsRectangle, int symbolWidth, int symbolHeight, int symbolHorizontalPadding, Rectangle pointsRectangle, int pointsFontSize, Rectangle artRectangle, Rectangle nameRectangle, int nameFontSize, Rectangle textRectangle, int cardWidth, int cardHeight, int sheetWidth, int sheetHeight, int numberOfCardsWide, int numberOfCardsHigh, int numberOfCardsSheet, boolean createImageFiles, boolean createSheetFiles, int pixelateToWidth, int pixelateToHeight, boolean pixelateCard) {
         this.templateFileName = templateFileName;
+        this.reverseFileName = reverseFileName;
         this.typeRectangle = typeRectangle;
         this.typeFontSize = typeFontSize;
         this.symbolsRectangle = symbolsRectangle;
@@ -45,6 +46,7 @@ public class DrawCards {
     }
 
     private final String templateFileName;
+    private final String reverseFileName;
     private final Rectangle typeRectangle;
     private final int typeFontSize;
     private final Rectangle symbolsRectangle;
@@ -109,13 +111,18 @@ public class DrawCards {
     }
 
     void drawCard(Card card, Graphics cardGraphics) throws IOException {
-        cardGraphics.drawImage(ImageIO.read(new File("./input/" + templateFileName)), 0, 0, null);
-        basicDrawText(cardGraphics, card.getTypeString(), typeRectangle, typeFontSize);
-        drawSymbols(cardGraphics, card);
-        basicDrawText(cardGraphics, card.getPoints(), pointsRectangle, pointsFontSize);
-        basicDrawText(cardGraphics, card.getCardName(), nameRectangle, nameFontSize);
-        drawArt(cardGraphics, card);
-        wrapDrawText(cardGraphics, card, textRectangle);
+        if (card.getType().equals(Card.CardType.REVERSE)) {
+            cardGraphics.drawImage(ImageIO.read(new File("./input/" + reverseFileName)), 0, 0, null);
+        } else {
+            cardGraphics.drawImage(ImageIO.read(new File("./input/" + templateFileName)), 0, 0, null);
+            cardGraphics.setColor(new Color(238, 238, 236));
+            basicDrawText(cardGraphics, card.getTypeString(), typeRectangle, typeFontSize);
+            drawSymbols(cardGraphics, card);
+            basicDrawText(cardGraphics, card.getPoints(), pointsRectangle, pointsFontSize);
+            basicDrawText(cardGraphics, card.getCardName(), nameRectangle, nameFontSize);
+            drawArt(cardGraphics, card);
+            wrapDrawText(cardGraphics, card, textRectangle);
+        }
     }
 
     void wrapDrawText(Graphics g, Card card, Rectangle rectangle) {
@@ -150,7 +157,6 @@ public class DrawCards {
         Font font = new Font(null, Font.PLAIN, fontsize);
         FontMetrics metrics = g.getFontMetrics(font);
         g.setFont(font);
-        g.setColor(new Color(238, 238, 236));
 
         int multiLineOffset = (lines.length - 1) * metrics.getHeight() * -1 / 2;
 

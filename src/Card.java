@@ -92,8 +92,24 @@ public class Card {
     }
 
     public String getTypeString() {
-        return type.equals(CardType.BAG) ? "B" : "C";
+        if (type.equals(CardType.BAG)) {
+            return "B";
+        } else if (type.equals(CardType.CHARM)) {
+            return "C";
+        } else {
+            return "R";
+        }
     }
 
-    enum CardType {BAG, CHARM}
+    public static CardType getTypeFromString(String string) {
+        if (string.equals("B")) {
+            return CardType.BAG;
+        } else if (string.equals("C")) {
+            return CardType.CHARM;
+        } else {
+            return CardType.REVERSE;
+        }
+    }
+
+    enum CardType {BAG, CHARM, REVERSE}
 }
