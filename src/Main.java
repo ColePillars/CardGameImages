@@ -63,10 +63,7 @@ public class Main {
                 Integer.parseInt(map.get("numberOfCardsHigh")),
                 Integer.parseInt(map.get("numberOfCardsWide")) * Integer.parseInt(map.get("numberOfCardsHigh")),
                 Boolean.parseBoolean(map.get("createImageFiles")),
-                Boolean.parseBoolean(map.get("createSheetFiles")),
-                Integer.parseInt(map.get("pixelateToWidth")),
-                Integer.parseInt(map.get("pixelateToHeight")),
-                Boolean.parseBoolean(map.get("pixelateCard"))
+                Boolean.parseBoolean(map.get("createSheetFiles"))
         );
 
         List<Card> cards = importCards(args[1]);

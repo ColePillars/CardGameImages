@@ -16,7 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 public class DrawCards {
-    public DrawCards(String templateFileName, String reverseFileName, Rectangle typeRectangle, int typeFontSize, Rectangle symbolsRectangle, int symbolWidth, int symbolHeight, int symbolHorizontalPadding, Rectangle pointsRectangle, int pointsFontSize, Rectangle artRectangle, Rectangle nameRectangle, int nameFontSize, Rectangle textRectangle, int cardWidth, int cardHeight, int sheetWidth, int sheetHeight, int numberOfCardsWide, int numberOfCardsHigh, int numberOfCardsSheet, boolean createImageFiles, boolean createSheetFiles, int pixelateToWidth, int pixelateToHeight, boolean pixelateCard) {
+    public DrawCards(String templateFileName, String reverseFileName, Rectangle typeRectangle, int typeFontSize, Rectangle symbolsRectangle, int symbolWidth, int symbolHeight, int symbolHorizontalPadding, Rectangle pointsRectangle, int pointsFontSize, Rectangle artRectangle, Rectangle nameRectangle, int nameFontSize, Rectangle textRectangle, int cardWidth, int cardHeight, int sheetWidth, int sheetHeight, int numberOfCardsWide, int numberOfCardsHigh, int numberOfCardsSheet, boolean createImageFiles, boolean createSheetFiles) {
         this.templateFileName = templateFileName;
         this.reverseFileName = reverseFileName;
         this.typeRectangle = typeRectangle;
@@ -40,9 +40,6 @@ public class DrawCards {
         this.numberOfCardsSheet = numberOfCardsSheet;
         this.createImageFiles = createImageFiles;
         this.createSheetFiles = createSheetFiles;
-        this.pixelateToWidth = pixelateToWidth;
-        this.pixelateToHeight = pixelateToHeight;
-        this.pixelateCard = pixelateCard;
     }
 
     private final String templateFileName;
@@ -68,9 +65,6 @@ public class DrawCards {
     private final int numberOfCardsSheet;
     private final boolean createImageFiles;
     private final boolean createSheetFiles;
-    private final int pixelateToWidth;
-    private final int pixelateToHeight;
-    private final boolean pixelateCard;
 
     public void drawCardsAndSheets(List<Card> cards) throws IOException {
         System.out.println(new Date() + " Start of drawing cards.");
@@ -214,18 +208,11 @@ public class DrawCards {
             art = ImageIO.read(new File("./input/charm.png"));
         }
 
-        g.drawImage(pixelateImage(art), (int) artRectangle.getX(), (int) artRectangle.getY(), null);
-    }
-
-    BufferedImage pixelateImage(BufferedImage image) {
-        if (pixelateCard) {
-            return resizeImage(
-                    resizeImage(image, pixelateToWidth, pixelateToHeight),
-                    (int) artRectangle.getWidth(),
-                    (int) artRectangle.getHeight());
-        } else {
-            return resizeImage(image, (int) artRectangle.getWidth(), (int) artRectangle.getHeight());
-        }
+        g.drawImage(
+                resizeImage(art, (int) artRectangle.getWidth(), (int) artRectangle.getHeight()),
+                (int) artRectangle.getX(),
+                (int) artRectangle.getY(),
+                null);
     }
 
     BufferedImage resizeImage(BufferedImage image, int width, int height) {
