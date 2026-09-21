@@ -16,9 +16,8 @@ import java.util.Date;
 import java.util.List;
 
 public class DrawCards {
-    public DrawCards(String templateFileName, String reverseFileName, Rectangle typeRectangle, int typeFontSize, Rectangle symbolsRectangle, int symbolWidth, int symbolHeight, int symbolHorizontalPadding, Rectangle pointsRectangle, int pointsFontSize, Rectangle artRectangle, Rectangle nameRectangle, int nameFontSize, Rectangle textRectangle, int cardWidth, int cardHeight, int sheetWidth, int sheetHeight, int numberOfCardsWide, int numberOfCardsHigh, int numberOfCardsSheet, boolean createImageFiles, boolean createSheetFiles) {
+    public DrawCards(String templateFileName, Rectangle typeRectangle, int typeFontSize, Rectangle symbolsRectangle, int symbolWidth, int symbolHeight, int symbolHorizontalPadding, Rectangle pointsRectangle, int pointsFontSize, Rectangle artRectangle, Rectangle nameRectangle, int nameFontSize, Rectangle textRectangle, int cardWidth, int cardHeight, int sheetWidth, int sheetHeight, int numberOfCardsWide, int numberOfCardsHigh, int numberOfCardsSheet, boolean createImageFiles, boolean createSheetFiles) {
         this.templateFileName = templateFileName;
-        this.reverseFileName = reverseFileName;
         this.typeRectangle = typeRectangle;
         this.typeFontSize = typeFontSize;
         this.symbolsRectangle = symbolsRectangle;
@@ -43,7 +42,6 @@ public class DrawCards {
     }
 
     private final String templateFileName;
-    private final String reverseFileName;
     private final Rectangle typeRectangle;
     private final int typeFontSize;
     private final Rectangle symbolsRectangle;
@@ -105,15 +103,15 @@ public class DrawCards {
     }
 
     void drawCard(Card card, Graphics cardGraphics) throws IOException {
-        if (card.getType().equals(Card.CardType.REVERSE)) {
-            cardGraphics.drawImage(ImageIO.read(new File("./input/" + reverseFileName)), 0, 0, null);
+        if (card.getType().equals(Card.CardType.OTHER)) {
+            cardGraphics.drawImage(ImageIO.read(new File("./input/" + card.getArtName() + ".png")), 0, 0, null);
         } else {
             cardGraphics.drawImage(ImageIO.read(new File("./input/" + templateFileName)), 0, 0, null);
             cardGraphics.setColor(new Color(238, 238, 236));
             basicDrawText(cardGraphics, card.getTypeString(), typeRectangle, typeFontSize);
             drawSymbols(cardGraphics, card);
             basicDrawText(cardGraphics, card.getPoints(), pointsRectangle, pointsFontSize);
-            basicDrawText(cardGraphics, card.getCardName(), nameRectangle, nameFontSize);
+            basicDrawText(cardGraphics, card.getCardName(), nameRectangle, card.getNameFontSize().isEmpty() ? nameFontSize : Integer.parseInt(card.getNameFontSize()));
             drawArt(cardGraphics, card);
             wrapDrawText(cardGraphics, card, textRectangle);
         }
@@ -129,6 +127,8 @@ public class DrawCards {
                             .flatMap(str -> Arrays.stream(WordUtils.wrap(str, Integer.parseInt(card.getWrapLength()), "\n", true).split("\n")))
                             .toArray(String[]::new);
             drawText(g, lines, rectangle, Integer.parseInt(card.getFontSize()));
+        } else if (card.getWrapLength().isEmpty() && !card.getFontSize().isEmpty()) {
+            drawText(g, card.getText().split("\n"), rectangle, Integer.parseInt(card.getFontSize()));
         } else {
             String[] lines = WordUtils.wrap(card.getText(), 25, "\n", true).split("\n");
             if (lines.length <= 3) {

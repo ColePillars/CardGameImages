@@ -4,6 +4,7 @@ public class Card {
     private String symbols;
     private String artName;
     private String cardName;
+    private String nameFontSize;
     private String text;
     private String wrapLength;
     private String fontSize;
@@ -14,6 +15,7 @@ public class Card {
             String symbols,
             String artName,
             String cardName,
+            String nameFontSize,
             String text,
             String wrapLength,
             String fontSize) {
@@ -22,6 +24,7 @@ public class Card {
         this.symbols = symbols;
         this.artName = artName;
         this.cardName = cardName;
+        this.nameFontSize = nameFontSize;
         this.text = text;
         this.wrapLength = wrapLength;
         this.fontSize = fontSize;
@@ -67,6 +70,14 @@ public class Card {
         this.cardName = cardName;
     }
 
+    public String getNameFontSize() {
+        return nameFontSize;
+    }
+
+    public void setNameFontSize(String nameFontSize) {
+        this.nameFontSize = nameFontSize;
+    }
+
     public String getText() {
         return text;
     }
@@ -106,10 +117,12 @@ public class Card {
             return CardType.BAG;
         } else if (string.equals("C")) {
             return CardType.CHARM;
+        } else if (string.equals("O")) {
+            return CardType.OTHER;
         } else {
-            return CardType.REVERSE;
+            return CardType.UNKNOWN;
         }
     }
 
-    enum CardType {BAG, CHARM, REVERSE}
+    enum CardType {BAG, CHARM, OTHER, UNKNOWN}
 }

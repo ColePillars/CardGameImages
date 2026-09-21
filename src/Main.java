@@ -18,7 +18,6 @@ public class Main {
 
         DrawCards drawCards = new DrawCards(
                 map.get("templateFileName"),
-                map.get("reverseFileName"),
                 new Rectangle(
                         Integer.parseInt(map.get("typeRectangleX")),
                         Integer.parseInt(map.get("typeRectangleY")),
@@ -95,9 +94,9 @@ public class Main {
             String[] line;
             while ((line = reader.readNext()) != null) {
                 Card.CardType cardType = Card.getTypeFromString(line[0]);
-                if (cardType.equals(Card.CardType.REVERSE)
+                if (cardType.equals(Card.CardType.OTHER)
                         || (!line[0].isEmpty() && !line[1].isEmpty() && !line[2].isEmpty())) {
-                    cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5], line[6], line[7]));
+                    cards.add(new Card(cardType, line[1], line[2], line[3], line[4], line[5], line[6], line[7], line[8]));
                 }
             }
         } catch (IOException | CsvValidationException e) {
